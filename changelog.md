@@ -18,6 +18,7 @@ If you haven't used 0.1, then ignore this section.
 ### Fixes:
 - Edit list buttons now work on all platforms.
 - Fixed log text appearing in the terminal upon editing a .json file.
+- Fixed wrapping and spacing issues.
 
 ## 0.1
 Initial version.
