@@ -3,15 +3,24 @@ TabPane {
     border: hidden
 }
 
+ItemGrid {
+    padding: 0 4;
+}
+
 #subs-horizontal {
     height: 3;
     align: left middle;
+    content-align: center middle;
+    width: auto;
+    margin-top: 1
 }
 
-#subs-horizontal Static {
+#append-mode-label{
+    height: 3;
+    content-align: center middle;
     width: auto;
-    margin-right: 1;
 }
+
 
 #list-selection, #subscription-selection, #oauth-site-list {
     height: auto;
@@ -31,6 +40,10 @@ TabPane {
 
 #list-actions Button, #config-actions Button, #subs-actions Button {
     width: 100%;
+}
+
+#oauth-grid {
+    margin-top: 1
 }
 
 .list-modal-actions {

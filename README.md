@@ -53,3 +53,5 @@ If a gallery-dl update fixes an issue, you can update it from the Config tab.
 - I can't download things from a particular site.
   - This is most likely an issue with gallery-dl. Try updating it from the Config tab, then file an issue on their [GitHub](https://github.com/mikf/gallery-dl) or [Codeberg](https://codeberg.org/mikf/gallery-dl) page if the issue persists.
   - Sometimes, sites may require you to provide cookies, an API key, or for you to log in using OAuth.
+- I get a leading zero error after editing the "daterange" option in the config file.
+  - Remove any leading zeroes. Instead of using "2026, 01, 01" for January 1st 2026, use "2026, 1, 1" instead. You should only use two digits in the month and day if necessary.

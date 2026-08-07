@@ -9,7 +9,7 @@ from textual.binding import Binding
 from textual.containers import Horizontal, ItemGrid
 from textual.widgets import (
     Header, TabbedContent, TabPane, Markdown, Footer,
-    Button, Label, Input, OptionList, Static, ListItem, ListView, Switch,
+    Button, Label, Input, OptionList, Static, ListItem, ListView, Switch, Rule
 )
 
 from .config import (
@@ -56,9 +56,11 @@ class GdlTui(App):
             with TabPane("Subscriptions"):
                 yield Markdown("Choose a subscription to update.")
                 yield OptionList(*subscription_option_labels(_DOWNLOAD_ALL_LABEL), id="subscription-selection")
-                with Horizontal(id="subs-horizontal"):
-                    yield Static("Append Mode: ", id="append-mode-label")
-                    yield Switch(id="append")
+                yield Horizontal(
+                    Static("Append Mode: ", id="append-mode-label"),
+                    Switch(id="append"),
+                    id="subs-horizontal"
+                )
                 yield ItemGrid(
                     Button("Download", id="download-subscription-button", variant="primary"),
                     Button("Edit List", id="edit-subscription-list-button"),
@@ -88,9 +90,13 @@ class GdlTui(App):
                     id="config-actions",
                     min_column_width=22,
                 )
+                yield Rule()
                 yield Markdown("Select an OAuth cache to reset.")
                 yield OptionList(*oauth_option_labels(), id="oauth-site-list")
-                yield Button("Reset OAuth Cache", id="reset-oauth-cache-button", variant="error")
+                yield ItemGrid(
+                    Button("Reset OAuth Cache", id="reset-oauth-cache-button", variant="error"),
+                    id="oauth-grid"
+                )
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:
