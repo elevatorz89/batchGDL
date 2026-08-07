@@ -8,11 +8,12 @@ If you haven't used 0.1, then ignore this section.
   - /lists/subscriptions
 
 ### Added:
+- If dependencies are missing, the script will now prompt to install them. 
 - List management (add/remove) from within the TUI.
 - Custom single lists can now be created.
 - Lists are moved to a trash folder instead of being instantly deleted.
 - You can now add extra flags for each download job.
-- Refresh config buttons added for situations in which you manually edit the conifig file.
+- Refresh buttons have been added for situations in which you manually edit the config file.
 - A "header" is added before each download run in the log to make it easier to parse and sniff out download errors.
 
 ### Fixes:

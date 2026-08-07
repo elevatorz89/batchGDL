@@ -6,7 +6,7 @@ from . import config as _cfg_module
 from .config import BATCHGDL_CONFIG_PATH
 
 
-def check_dependencies() -> bool:
+def check_dependencies() -> list[str]:
     missing: list[str] = []
     if not shutil.which("gallery-dl"):
         missing.append("gallery-dl")
@@ -15,8 +15,7 @@ def check_dependencies() -> bool:
             missing.append(package)
     if missing:
         print(f"Missing dependencies: {', '.join(missing)}")
-        return False
-    return True
+    return missing
 
 
 def check_setup() -> bool:

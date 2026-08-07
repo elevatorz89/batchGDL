@@ -130,9 +130,10 @@ def spawn_new_console_series(command: list[str], *, cwd: str | None = None) -> i
 def quote_cmd_arg(arg: str) -> str:
     if not arg:
         return '""'
-    if not any(ch in arg for ch in ' \t&|()<>^"%!'):
-        return arg
-    return f'"{arg.replace(chr(34), chr(34) * 2)}"'
+    escaped = arg.replace("%", "%%")
+    if not any(ch in escaped for ch in ' \t&|()<>^"%!'):
+        return escaped
+    return f'"{escaped.replace(chr(34), chr(34) * 2)}"'
 
 
 def join_cmd_args(args: list[str]) -> str:

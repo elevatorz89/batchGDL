@@ -7,20 +7,25 @@ if __package__ is None and not getattr(sys, 'frozen', False):
     path = os.path.realpath(os.path.abspath(__file__))
     sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
 
-from batchGDL.app import GdlTui
+
 from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete
 from batchGDL.config import reload_config
 
 if __name__ == "__main__":
-    if not check_dependencies():
+    missing = check_dependencies()
+    if missing:
         choice = ""
         while choice != "y" or "n":
             choice = input("Would you like to install the missing dependencies? (Y/n) ").lower()
             if choice == "y":
-                subprocess.run("pip install -r requirements.txt")
+                subprocess.run(
+                    [sys.executable, "-m", "pip", "install", "--break-system-packages", *missing]
+                )
                 break
             elif choice == "n":
                 exit(0)
+
+    from batchGDL.app import GdlTui
 
     if not check_setup():
         print("\n---")

@@ -30,8 +30,9 @@ def log_download_job_cmd(job_name: str) -> str:
         f"p={path!r};"
         f"n={job_name!r};"
         "open(p,'a',encoding='utf-8').write("
-        "'\\n[Download job \"%s\" at %s]\\n'%(n,datetime.now().strftime('%Y-%m-%d %H:%M:%S'))"
-        ")"
+        "'\\n-----[Download job '+chr(34)+n+chr(34)+' at '+"
+        "datetime.now().isoformat(sep=' ',timespec='seconds')"
+        "+']-----\\n')"
     )
     return join_cmd_args([sys.executable, "-c", py])
 
