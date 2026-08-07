@@ -1,6 +1,7 @@
 tests/
 .venv/
 .idea/
+__pycache__/
 
 # for local testing
 archive/

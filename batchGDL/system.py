@@ -8,25 +8,33 @@ from .constants import TRASH_LISTS_DIR
 
 def open_editor(path: str) -> None:
     path = os.path.abspath(path)
-    popen_kw = dict(
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
     if sys.platform.startswith("darwin"):
-        subprocess.Popen(["open", path], **popen_kw)
+        subprocess.Popen(
+            ["open", path],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
     elif os.name == "nt":
         # weird workaround to stop output(?) text from appearing in the terminal
         subprocess.Popen(
             ["cmd", "/c", "start", "", path],
             creationflags=subprocess.CREATE_NO_WINDOW,
-            **popen_kw,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
     else:
         opener = shutil.which("xdg-open") or shutil.which("gio")
         if not opener:
             raise OSError("No suitable file opener found for this platform")
-        subprocess.Popen([opener, path], start_new_session=True, **popen_kw)
+        subprocess.Popen(
+            [opener, path],
+            start_new_session=True,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
 
 def move_to_trash(path: str) -> None:
