@@ -23,7 +23,8 @@ python -m pip install rapidfuzz textual gallery-dl
 ## Setup
 Download and unpack the zip file from the releases page. After doing so, edit the settings in the `batchGDL-config.json` file:
 
-- `daterange` - A date at which the subscription downloader will stop. Anything prior to this date will be skipped.
+- `daterange` - A date at which the subscription downloader will stop. Anything prior to this date will be skipped. By default, it is set to "YYYY, MM, DD". If the subscription tab sees this default value, it will refuse to start downloading.
+  - You have to update this manually between subscription runs. In the future, this will be replaced with a "global flags" setting that can be edited from the UI.
 - `config_file` - Path to your gallery-dl config file. (include file extension)
 - `log_file` - Path to your gallery-dl logs file.
 - `cookies_browser` - The browser to read cookies from.
