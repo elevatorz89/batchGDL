@@ -1,0 +1,85 @@
+TabPane {
+    overflow-y: auto;
+    border: hidden
+}
+
+#subs-horizontal {
+    height: 3;
+    align: left middle;
+}
+
+#subs-horizontal Static {
+    width: auto;
+    margin-right: 1;
+}
+
+#list-selection, #subscription-selection, #oauth-site-list {
+    height: auto;
+    max-height: 12;
+}
+
+#list-actions, #config-actions, #subs-actions {
+    height: auto;
+    margin-top: 1;
+    grid-gutter: 1 1;
+    width: 1fr;
+}
+
+#config-actions {
+    margin-bottom: 1;
+}
+
+#list-actions Button, #config-actions Button, #subs-actions Button {
+    width: 100%;
+}
+
+.list-modal-actions {
+    layout: grid;
+    grid-gutter: 1 1;
+    height: auto;
+    margin-top: 1;
+    width: 1fr;
+}
+
+.list-modal-actions Button {
+    width: 100%;
+}
+
+.list-modal {
+    width: 70;
+    height: auto;
+    max-height: 80%;
+    border: wide $primary;
+    background: $surface;
+    padding: 1 2;
+}
+
+.list-modal-scroll {
+    max-height: 80%;
+    scrollbar-gutter: stable;
+}
+
+.list-modal-scroll:focus {
+    outline: none;
+}
+
+.list-modal-title {
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+.list-modal-note {
+    color: $text-muted;
+    margin-bottom: 1;
+}
+
+.list-modal-error {
+    color: $error;
+    height: 1;
+    margin-top: 1;
+}
+
+ModalScreen {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.5);
+}

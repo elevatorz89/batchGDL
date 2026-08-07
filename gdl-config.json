@@ -1,0 +1,24 @@
+{
+    "extractor": {
+        "oauth": {
+            "browser": true
+        },
+        "reddit": {
+			"directory" : ["reddit","{author}", "{subreddit}"]
+        }
+    },
+    "output":{
+        "logfile": {
+            "path": "logfile_latest.txt",
+            "mode": "a",
+            "format": {
+                "debug"  : "[{asctime}][{levelname}] {message}",
+                "info"   : "[{asctime}][{levelname}] {message}",
+                "warning": "[{asctime}][{levelname}] {message} [Source URL: {extractor.url}]",
+                "error"  : "[{asctime}][{levelname}] {message} [Source URL: {extractor.url}]"
+            },
+            "format-date": "%Y-%m-%dT%H:%M:%S",
+            "level": "info"
+        }
+    }
+}

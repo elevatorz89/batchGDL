@@ -1,0 +1,8 @@
+tests/
+.venv/
+.idea/
+archive/
+downloads/
+lists/
+_notes/
+_old/
