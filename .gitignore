@@ -1,8 +1,12 @@
 tests/
 .venv/
 .idea/
+
+# for local testing
 archive/
 downloads/
 lists/
+
+# old code & private notes
 _notes/
 _old/
