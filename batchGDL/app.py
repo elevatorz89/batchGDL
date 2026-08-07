@@ -94,7 +94,7 @@ class GdlTui(App):
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:
-        self.title = "batchGDL v0.2-rc724"
+        self.title = "batchGDL v0.2"
 
     def _selected_option_prompt(self, option_list_id: str) -> str | None:
         option = self.query_one(option_list_id, OptionList).highlighted_option
@@ -184,6 +184,15 @@ class GdlTui(App):
     ) -> bool:
         if list_file_is_empty(list_file, lists_dir):
             self.notify(f"{label} is empty. There's nothing to download.", severity="warning")
+            return False
+        return True
+
+    def _require_daterange(self) -> bool:
+        if date_range_filter() is None:
+            self.notify(
+                'Set "daterange" in the config first (replace the YYYY, MM, DD placeholder).',
+                severity="warning",
+            )
             return False
         return True
 
@@ -381,6 +390,8 @@ class GdlTui(App):
             if append:
                 self.notify("Turn off Append mode first.", severity="warning")
                 return
+            if not self._require_daterange():
+                return
             subs = config.get("subscriptions") or {}
             if not subs:
                 self.notify("No subscriptions in config.", severity="warning")
@@ -416,6 +427,8 @@ class GdlTui(App):
             label = "Append list"
             job_name = f"{name} (append)"
         else:
+            if not self._require_daterange():
+                return
             input_file = list_file
             label = f'Subscription "{name}"'
             job_name = name

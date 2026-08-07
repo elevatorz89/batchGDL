@@ -1,5 +1,7 @@
 import os
 import sys
+import json
+import shlex
 import shutil
 import subprocess
 
@@ -75,8 +77,46 @@ def clear_list_trash() -> int:
     return removed
 
 
+# there HAS to be a better way to do this
+# but this works so it'll probably be a 0.3 change
+def _unix_console_command(command: list[str], cwd: str) -> list[str] | None:
+    shell_line = f"cd {shlex.quote(cwd)} && exec {shlex.join(command)}"
+    if sys.platform.startswith("darwin"):
+        return [
+            "osascript",
+            "-e",
+            f'tell application "Terminal" to do script {json.dumps(shell_line)}',
+        ]
+    for launcher in (
+        ["xdg-terminal-exec", "bash", "-lc", shell_line],
+        ["x-terminal-emulator", "-e", "bash", "-lc", shell_line],
+        ["gnome-terminal", "--", "bash", "-lc", shell_line],
+        ["konsole", "-e", "bash", "-lc", shell_line],
+        ["xfce4-terminal", "-e", f"bash -lc {shlex.quote(shell_line)}"],
+        ["xterm", "-e", "bash", "-lc", shell_line],
+    ):
+        if shutil.which(launcher[0]):
+            return launcher
+    return None
+
+
 def _new_console_process(command: list[str], *, cwd: str | None = None) -> subprocess.Popen:
-    return subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, cwd=cwd)
+    work_dir = os.path.abspath(cwd or os.getcwd())
+    if os.name == "nt":
+        return subprocess.Popen(
+            command,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+            cwd=work_dir,
+        )
+    launch = _unix_console_command(command, work_dir) or command
+    return subprocess.Popen(
+        launch,
+        cwd=None if launch is not command else work_dir,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
 
 
 def spawn_new_console(command: list[str], *, cwd: str | None = None) -> None:

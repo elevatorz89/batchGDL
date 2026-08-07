@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-DIR="$PWD"
+DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$DIR"
 CMD="python3 batchGDL/main.py"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
     osascript -e "tell application \"Terminal\" to do script \"cd '$DIR' && $CMD\""
     exit 0
 else
-    python3 app.py
+    $CMD
 fi

@@ -10,9 +10,10 @@ config: dict = {}
 
 
 def reload_config() -> None:
-    global config
     with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as f:
-        config = json.load(f)
+        data = json.load(f)
+    config.clear()
+    config.update(data)
 
 
 def save_config() -> None:
@@ -43,10 +44,11 @@ def single_list_option_labels() -> list[str]:
 def subscription_option_labels(download_all_label: str) -> list[str]:
     return [*config.get("subscriptions", {}), download_all_label]
 
-
-def date_range_filter() -> str:
-    return f"date >= datetime({config['daterange']}) or abort()"
-
+def date_range_filter() -> str | None:
+    raw = str(config.get("daterange", "")).strip()
+    if not raw or raw == "YYYY, MM, DD":
+        return None
+    return f"date >= datetime({raw}) or abort()"
 
 def entry_extra_flags(entry: list, index: int) -> str:
     if len(entry) <= index:

@@ -27,7 +27,8 @@ def check_setup() -> bool:
         with open(BATCHGDL_CONFIG_PATH, "w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=2)
             fh.write("\n")
-        _cfg_module.config = data
+        _cfg_module.config.clear()
+        _cfg_module.config.update(data)
         return False
     if data.get("setup") == "false":
         return False
@@ -41,4 +42,5 @@ def mark_setup_complete() -> None:
     with open(BATCHGDL_CONFIG_PATH, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
         fh.write("\n")
-    _cfg_module.config = data
+    _cfg_module.config.clear()
+    _cfg_module.config.update(data)

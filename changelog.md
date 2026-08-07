@@ -1,5 +1,5 @@
 # Changelog
-## 0.2 - 2026/08/06
+## 0.2 - 2026/08/07
 
 ### Breaking Changes:
 If you haven't used 0.1, then ignore this section.
