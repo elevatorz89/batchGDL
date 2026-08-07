@@ -35,6 +35,8 @@ By default, the file paths will point relative to the script folder.
 ## Running the script
 Run the `run_windows.bat` or `run_linux-macos.sh` scripts to make it easier on desktop. Otherwise, run `batchGDL/main.py` in your terminal of choice.
 
+On linux, you may need to run `chmod +x run_linux-macos.sh` to make the script executable.
+
 # Gallery-DL Help
 Refer to the official repositories for assistance and bugs related to the downloader and config file formatting:
 - https://github.com/mikf/gallery-dl

@@ -516,7 +516,7 @@ class GdlTui(App):
         self.notify("Updating gallery-dl...")
         try:
             spawn_new_console(
-                [sys.executable, "-m", "pip", "install", "--user", "--upgrade", "gallery-dl"]
+                [sys.executable, "-m", "pip", "install", "--break-system-packages", "--upgrade", "gallery-dl"]
             )
         except Exception as e:
             self.notify(f"Error opening updater: {e}", severity="error")
