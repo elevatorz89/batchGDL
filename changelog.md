@@ -1,5 +1,5 @@
 # Changelog
-## 0.2 - 2026/07/2X
+## 0.2 - 2026/08/06
 
 ### Breaking Changes:
 If you haven't used 0.1, then ignore this section.
@@ -8,10 +8,11 @@ If you haven't used 0.1, then ignore this section.
   - /lists/subscriptions
 
 ### Added:
-- Custom single lists can now be created.
 - List management (add/remove) from within the TUI.
-- Refresh button to update the TUI with any changes to the config from outside the TUI.
+- Custom single lists can now be created.
+- Lists are moved to a trash folder instead of being instantly deleted.
 - You can now add extra flags for each download job.
+- Refresh config buttons added for situations in which you manually edit the conifig file.
 - A "header" is added before each download run in the log to make it easier to parse and sniff out download errors.
 
 ### Fixes:
