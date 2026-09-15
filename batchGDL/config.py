@@ -1,6 +1,7 @@
 import json
 import os
 import shlex
+from time import sleep
 
 _PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 BATCHGDL_CONFIG_PATH = os.path.normpath(os.path.join(_PACKAGE_DIR, "../batchGDL-config.json"))
@@ -20,6 +21,47 @@ def save_config() -> None:
     with open(BATCHGDL_CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)
         f.write("\n")
+
+def update_config(curr_version, new_version) -> None:
+    with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    while curr_version < new_version:
+        sleep(1)
+        if curr_version == 0:
+            print ("v1 Config Detected.")
+            curr_version = 1
+        if curr_version == 1:
+            tmp = data["single-lists"]
+            tmp2 = data["subscriptions"]
+            tmp3 = data["daterange"]
+            tmp4 = data["cookies_browser"]
+
+            data["download-jobs"] = {}
+            data["download-jobs"]["single"] = tmp
+            data["download-jobs"]["subscription"] = tmp2
+            data["global-flags-single"] = [f"--filter {tmp3}", f"--cookies-from-browser {tmp4}"]
+            data["global-flags-subscriptions"] = [f"--filter {tmp3}", f"--cookies-from-browser {tmp4}"]
+
+            data.pop("single-lists")
+            data.pop("subscriptions")
+            data.pop("daterange")
+            data.pop("cookies_browser")
+            data.pop("#")
+
+            data["conf_ver"] = 2
+            print("Config updated to v2.")
+            curr_version = 2
+
+    with open(BATCHGDL_CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+    config.clear()
+    config.update(data)
+
+
+    #config[key] = value
+    #save_config()
 
 
 def config_file_path() -> str:

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.1 - 2026/0X/XX
+## 0.2.1 - 2026/XX/XX
 ### TODO:
 - [ ] Change language from "lists" to "jobs"
 - [ ] Global flags options for both single and subscription lists.
@@ -9,15 +9,15 @@
   - The subscription list default should also have the date filter.
   - Maybe you should ask during setup for a browser preference?
 - [ ] Config Changes
-  - [ ] Updater
-    - [ ] Make a config updater that runs upon startup
-    - [ ] Append a config version variable to the config file
+  - [x] Updater
+    - [x] Make a config updater that runs upon startup
+    - [x] Append a config version variable to the config file
   - [ ] Before an update, make a backup of the previous config file
-  - [ ] Change `"single-lists":` to `"single":`
-  - [ ] Nest both list types underneath a new `"download-jobs"` category
-  - [ ] Move current daterange and cookies browser variables to global flags.
+  - [x] Change `"single-lists":` to `"single":`
+  - [x] Nest both list types underneath a new `"download-jobs"` category
+  - [~] Move the current daterange, cookies, and browser variables to global flags.
 - [ ] Figure out a "check for updates" button.
-- [ ] Figure out if auto-refeshing the config file is doable without too much extra code.
+- [ ] Figure out if auto-refreshing the config file is doable.
 
 
 ## 0.2 - 2026/08/07

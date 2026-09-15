@@ -77,8 +77,8 @@ def clear_list_trash() -> int:
     return removed
 
 
-# there HAS to be a better way to do this
-# but this works so it'll probably be a 0.3 change
+# there HAS to be a better way to do this.
+# but this works, so it'll probably be a 0.3 change
 def _unix_console_command(command: list[str], cwd: str) -> list[str] | None:
     shell_line = f"cd {shlex.quote(cwd)} && exec {shlex.join(command)}"
     if sys.platform.startswith("darwin"):

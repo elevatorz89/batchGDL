@@ -8,8 +8,9 @@ if __package__ is None and not getattr(sys, 'frozen', False):
     sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
 
 
-from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete
+from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete, get_config_version
 from batchGDL.config import reload_config
+from batchGDL.constants import CONFIG_VERSION
 
 if __name__ == "__main__":
     missing = check_dependencies()
@@ -33,4 +34,9 @@ if __name__ == "__main__":
         input("Once you've made your edits, press ENTER to continue.")
         mark_setup_complete()
         reload_config()
+
+    # get_config_version() # launches the config updater
+
+
+
     GdlTui().run()
