@@ -2,10 +2,10 @@
 A simple TUI for managing gallery-dl subscriptions with a simple interface, written in python. It's recommended to be familiar with gallery-dl before using this script.
 
 # Features
-- Manage multiple download lists and subscriptions independently.
+- Manage independent download lists and subscriptions independently of each other.
 - An "append mode" that lets you redownload an entire subscription while ignoring the archive file. 
 - Apply additional flags per download job
-- Search through your download list files from within the TUI.
+- Search through your download job files from within the TUI.
 - Shortcut buttons to config/log files.
 - Update gallery-dl without using the command line.
 
@@ -23,11 +23,11 @@ python -m pip install rapidfuzz textual gallery-dl
 ## Setup
 Download and unpack the zip file from the releases page. After doing so, edit the settings in the `batchGDL-config.json` file:
 
-- `daterange` - A date at which the subscription downloader will stop. Anything prior to this date will be skipped. By default, it is set to "YYYY, MM, DD". If the subscription tab sees this default value, it will refuse to start downloading.
-  - You have to update this manually between subscription runs. In the future, this will be replaced with a "global flags" setting that can be edited from the UI.
+- ~~`daterange` - A date at which the subscription downloader will stop. Anything prior to this date will be skipped. By default, it is set to "YYYY, MM, DD". If the subscription tab sees this default value, it will refuse to start downloading.~~ <- Moved to global flags
+  - ~~You have to update this manually between subscription runs. In the future, this will be replaced with a "global flags" setting that can be edited from the UI.~~
 - `config_file` - Path to your gallery-dl config file. (include the file extension)
 - `log_file` - Path to your gallery-dl logs file.
-- `cookies_browser` - The browser to read cookies from.
+- ~~`cookies_browser` - The browser to read cookies from.~~ <- Moved to global flags
 - `dl_folder` - Path to a folder to store your downloaded media.
 - `oauth-sites` - A comma separated list of sites that require OAuth to download (protected) media.
 

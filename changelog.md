@@ -2,7 +2,6 @@
 
 ## 0.2.1 - 2026/XX/XX
 ### TODO:
-- [ ] Change language from "lists" to "jobs"
 - [ ] Global flags options for both single and subscription lists.
   - This should fix flag collision.
   - By default, both should have --cookies-from-browser firefox.
@@ -15,7 +14,7 @@
   - [ ] Before an update, make a backup of the previous config file
   - [x] Change `"single-lists":` to `"single":`
   - [x] Nest both list types underneath a new `"download-jobs"` category
-  - [~] Move the current daterange, cookies, and browser variables to global flags.
+  - [x] Move the current daterange, cookies, and browser variables to global flags.
 - [ ] Figure out a "check for updates" button.
 - [ ] Figure out if auto-refreshing the config file is doable.
 
