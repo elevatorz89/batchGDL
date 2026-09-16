@@ -79,12 +79,16 @@ def oauth_option_labels() -> list[str]:
     return ["All Sites", *oauth_sites()]
 
 
+def job_section(kind: str) -> dict:
+    return config.setdefault("download-jobs", {}).setdefault(kind, {})
+
+
 def single_list_option_labels() -> list[str]:
-    return list(config.get("single-lists", {}))
+    return list(job_section("single"))
 
 
 def subscription_option_labels(download_all_label: str) -> list[str]:
-    return [*config.get("subscriptions", {}), download_all_label]
+    return [*job_section("subscription"), download_all_label]
 
 
 def global_flags_string(config_key: str) -> str:

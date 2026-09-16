@@ -14,7 +14,7 @@ from textual.widgets import (
 
 from .config import (
     config, reload_config, entry_extra_flags, global_flags_string,
-    oauth_sites, oauth_option_labels, single_list_option_labels,
+    job_section, oauth_sites, oauth_option_labels, single_list_option_labels,
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
 from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
@@ -148,13 +148,13 @@ class GdlTui(App):
             self.notify(message, severity="information")
 
     def _single_list_entry(self, name: str) -> tuple[str, str, str] | None:
-        entry = config.get("single-lists", {}).get(name)
+        entry = job_section("single").get(name)
         if not entry or len(entry) < 2:
             return None
         return entry[0], entry[1], entry_extra_flags(entry, 2)
 
     def _subscription_entry(self, name: str) -> tuple[str, str, str | None, str] | None:
-        entry = config.get("subscriptions", {}).get(name)
+        entry = job_section("subscription").get(name)
         if not entry or len(entry) < 2:
             return None
         archive = entry[2] if len(entry) > 2 else None
@@ -404,7 +404,7 @@ class GdlTui(App):
             if append:
                 self.notify("Turn off Append mode first.", severity="warning")
                 return
-            subs = config.get("subscriptions") or {}
+            subs = job_section("subscription")
             if not subs:
                 self.notify("No subscriptions in config.", severity="warning")
                 return

@@ -7,7 +7,7 @@ from textual.containers import Vertical, VerticalScroll, ItemGrid
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Input
 
-from .config import config, save_config, entry_extra_flags, with_optional_flags
+from .config import config, save_config, entry_extra_flags, job_section, with_optional_flags
 from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
 from .lists import slug_list_name, lists_txt_path, ensure_list_txt, ensure_or_rename_list_txt
 from .system import open_editor, move_to_trash, clear_list_trash
@@ -59,7 +59,7 @@ class EntryModal(ModalScreen[bool]):
         return slug_list_name(list_file or display_name) if display_name or list_file else None
 
     def list_file_from_entry(self, entry: list) -> str | None:
-        index_by_section = {"single-lists": 0, "subscriptions": 1}
+        index_by_section = {"single": 0, "subscription": 1}
         index = index_by_section.get(self._CONFIG_SECTION)
         if index is None:
             return None
@@ -97,7 +97,7 @@ class EntryModal(ModalScreen[bool]):
     def on_open_list_pressed(self, event: Button.Pressed) -> None:
         list_file = self.list_file_from_values(self._field_values())
         if not list_file and self.original_name:
-            entry = config.get(self._CONFIG_SECTION, {}).get(self.original_name)
+            entry = job_section(self._CONFIG_SECTION).get(self.original_name)
             if entry:
                 list_file = self.list_file_from_entry(entry)
         if not list_file:
@@ -119,9 +119,9 @@ class EntryModal(ModalScreen[bool]):
             error.update("Display name is required.")
             return
 
-        section = config.setdefault(self._CONFIG_SECTION, {})
+        section = job_section(self._CONFIG_SECTION)
         if display_name in section and display_name != self.original_name:
-            kind = "subscription" if self._CONFIG_SECTION == "subscriptions" else "list"
+            kind = "subscription" if self._CONFIG_SECTION == "subscription" else "list"
             error.update(f"A {kind} with that display name already exists.")
             return
 
@@ -153,11 +153,11 @@ class ListModal(EntryModal):
     )
     _TITLE_ADD = "Add List"
     _TITLE_EDIT = "Edit List"
-    _CONFIG_SECTION = "single-lists"
+    _CONFIG_SECTION = "single"
     _LISTS_DIR = SINGLE_LISTS_DIR
 
     def initial_values(self) -> dict[str, str]:
-        entry = config.get("single-lists", {}).get(self.original_name or "")
+        entry = job_section("single").get(self.original_name or "")
         if not entry or len(entry) < 2:
             return {"display-name": self.original_name or ""}
         return {
@@ -184,11 +184,11 @@ class SubscriptionModal(EntryModal):
     )
     _TITLE_ADD = "Add Subscription"
     _TITLE_EDIT = "Edit Subscription"
-    _CONFIG_SECTION = "subscriptions"
+    _CONFIG_SECTION = "subscription"
     _LISTS_DIR = SUBSCRIPTION_LISTS_DIR
 
     def initial_values(self) -> dict[str, str]:
-        entry = config.get("subscriptions", {}).get(self.original_name or "")
+        entry = job_section("subscription").get(self.original_name or "")
         if not entry or len(entry) < 2:
             return {"display-name": self.original_name or ""}
         return {
@@ -264,7 +264,7 @@ class DeleteEntryModal(ModalScreen[bool]):
                     self.app.notify(f"Could not move list file to trash: {e}", severity="error")
                     return
 
-        config.get(self.config_section, {}).pop(self.item_name, None)
+        job_section(self.config_section).pop(self.item_name, None)
         save_config()
         self.dismiss(True)
 
