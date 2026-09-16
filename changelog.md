@@ -1,17 +1,13 @@
 # Changelog
 
-## 0.2.1 - 2026/XX/XX
+## 0.2.1 - 2026/09/XX
 ### TODO:
-- [X] Global flags options for both single and subscription lists.
-  - This should fix flag collision.
-  - By default, both should have --cookies-from-browser firefox.
-  - The subscription list default should also have the date filter.
-  - Maybe you should ask during setup for a browser preference?
+- [x] Global flags options for both single and subscription lists.
 - [x] Config Changes
   - [x] Updater
     - [x] Make a config updater that runs upon startup
     - [x] Append a config version variable to the config file
-  - [x] Before an update, make a backup of the previous config file
+    - [x] Before an update, make a backup of the previous config file
   - [x] Change `"single-lists":` to `"single":`
   - [x] Nest both list types underneath a new `"download-jobs"` category
   - [x] Move the current daterange, cookies, and browser variables to global flags.
@@ -23,13 +19,13 @@
 - Config Updater
   - If an update changes the config format (like this one, for example), your options will automatically be migrated to the new format.
   - A backup copy of the original config will be made prior to the update.
-- 
+- ~~Check for updates button~~
 
 ### Changes:
 - The daterange and cookies_browser options are no longer hardcoded into the downloader. Upon startup, they will be moved to the new global flags string.
 
 ### Fixes:
-- Quotation marks (") will be replaced by apostrophes (') when saving global or optional flags.
+- Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.
 
 
 

@@ -17,7 +17,7 @@ from .config import (
     job_section, oauth_sites, oauth_option_labels, single_list_option_labels,
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
-from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
+from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APP_VERSION
 from .downloads import build_command, log_download_job, write_download_all_script
 from .lists import lists_txt_path, ensure_list_txt, list_file_is_empty
 from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal, GlobalFlagsModal
@@ -102,7 +102,7 @@ class GdlTui(App):
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:
-        self.title = "batchGDL v0.2"
+        self.title = f"batchGDL v{APP_VERSION}"
 
     def _selected_option_prompt(self, option_list_id: str) -> str | None:
         option = self.query_one(option_list_id, OptionList).highlighted_option
