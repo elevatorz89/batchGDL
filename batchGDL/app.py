@@ -13,7 +13,7 @@ from textual.widgets import (
 )
 
 from .config import (
-    config, reload_config, date_range_filter, entry_extra_flags,
+    config, reload_config, entry_extra_flags, global_flags_string,
     oauth_sites, oauth_option_labels, single_list_option_labels,
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
@@ -195,15 +195,6 @@ class GdlTui(App):
             return False
         return True
 
-    def _require_daterange(self) -> bool:
-        if date_range_filter() is None:
-            self.notify(
-                'Set "daterange" in the config first (replace the YYYY, MM, DD placeholder).',
-                severity="warning",
-            )
-            return False
-        return True
-
     def ensure_append_list(self) -> None:
         ensure_list_txt(_APPEND_LIST_NAME, SUBSCRIPTION_LISTS_DIR)
 
@@ -244,8 +235,8 @@ class GdlTui(App):
         input_file: str,
         path_key: str,
         archive: str | None = None,
-        range_filter: str | None = None,
         lists_dir: str = SUBSCRIPTION_LISTS_DIR,
+        global_flags: str | None = None,
         extra_flags: str | None = None,
         job_name: str | None = None,
         notify_message: str | None = None,
@@ -263,8 +254,8 @@ class GdlTui(App):
                 input_file=input_file,
                 path_key=path_key,
                 archive=archive,
-                range_filter=range_filter,
                 lists_dir=lists_dir,
+                global_flags=global_flags,
                 extra_flags=extra_flags,
             )
         )
@@ -290,7 +281,7 @@ class GdlTui(App):
             self._delete_modal(
                 "Delete List",
                 name,
-                "single-lists",
+                "single",
                 entry[0] if entry else None,
                 lists_dir=SINGLE_LISTS_DIR,
             ),
@@ -338,6 +329,7 @@ class GdlTui(App):
             input_file=list_file,
             path_key="list",
             lists_dir=SINGLE_LISTS_DIR,
+            global_flags=global_flags_string("global-flags-single"),
             extra_flags=extra_flags,
             job_name=name,
             notify_message=f"Starting download for {name} in a new terminal window.",
@@ -360,7 +352,7 @@ class GdlTui(App):
         if not name:
             return
         self.push_screen(
-            self._delete_modal("Delete Subscription", name, "subscriptions", self._subscription_list_file(name)),
+            self._delete_modal("Delete Subscription", name, "subscription", self._subscription_list_file(name)),
             lambda result: self._refresh_after_modal(
                 result,
                 _SUBSCRIPTION_SELECTION,
@@ -412,8 +404,6 @@ class GdlTui(App):
             if append:
                 self.notify("Turn off Append mode first.", severity="warning")
                 return
-            if not self._require_daterange():
-                return
             subs = config.get("subscriptions") or {}
             if not subs:
                 self.notify("No subscriptions in config.", severity="warning")
@@ -449,8 +439,6 @@ class GdlTui(App):
             label = "Append list"
             job_name = f"{name} (append)"
         else:
-            if not self._require_daterange():
-                return
             input_file = list_file
             label = f'Subscription "{name}"'
             job_name = name
@@ -463,7 +451,7 @@ class GdlTui(App):
             input_file=input_file,
             path_key="sub",
             archive=archive,
-            range_filter=None if append else date_range_filter(),
+            global_flags=global_flags_string("global-flags-subscriptions"),
             extra_flags=extra_flags,
             job_name=job_name,
             notify_message=f"Starting download for {name}.",

@@ -2,7 +2,7 @@
 
 ## 0.2.1 - 2026/XX/XX
 ### TODO:
-- [ ] Global flags options for both single and subscription lists.
+- [X] Global flags options for both single and subscription lists.
   - This should fix flag collision.
   - By default, both should have --cookies-from-browser firefox.
   - The subscription list default should also have the date filter.

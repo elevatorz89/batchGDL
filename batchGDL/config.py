@@ -40,7 +40,7 @@ def update_config(curr_version, new_version) -> None:
             data["download-jobs"] = {}
             data["download-jobs"]["single"] = tmp
             data["download-jobs"]["subscription"] = tmp2
-            data["global-flags-single"] = [f"--filter 'date >= datetime({tmp3}) or abort()' --cookies-from-browser {tmp4}"]
+            data["global-flags-single"] = [f"--cookies-from-browser {tmp4}"]
             data["global-flags-subscriptions"] = [f"--filter 'date >= datetime({tmp3}) or abort()' --cookies-from-browser {tmp4}"]
 
             data.pop("single-lists")
@@ -86,11 +86,12 @@ def single_list_option_labels() -> list[str]:
 def subscription_option_labels(download_all_label: str) -> list[str]:
     return [*config.get("subscriptions", {}), download_all_label]
 
-def date_range_filter() -> str | None:
-    raw = str(config.get("daterange", "")).strip()
-    if not raw or raw == "YYYY, MM, DD":
-        return None
-    return f"date >= datetime({raw}) or abort()"
+
+def global_flags_string(config_key: str) -> str:
+    flags = config.get(config_key) or []
+    if isinstance(flags, str):
+        return flags.strip()
+    return " ".join(str(flag).strip() for flag in flags if str(flag).strip())
 
 def entry_extra_flags(entry: list, index: int) -> str:
     if len(entry) <= index:

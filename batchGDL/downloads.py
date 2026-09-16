@@ -3,7 +3,7 @@ import sys
 import tempfile
 from datetime import datetime
 
-from .config import config, config_file_path, date_range_filter, entry_extra_flags, parse_extra_flags
+from .config import config, config_file_path, entry_extra_flags, global_flags_string, parse_extra_flags
 from .constants import SUBSCRIPTION_LISTS_DIR
 from .lists import lists_txt_path
 from .system import echo_cmd_text, join_cmd_args
@@ -43,16 +43,14 @@ def build_command(
     input_file: str,
     path_key: str,
     archive: str | None = None,
-    range_filter: str | None = None,
     lists_dir: str = SUBSCRIPTION_LISTS_DIR,
+    global_flags: str | None = None,
     extra_flags: str | None = None,
 ) -> list[str]:
     command = [
         "gallery-dl",
         "--config",
         config_file_path(),
-        "--cookies-from-browser",
-        config["cookies_browser"],
         "--destination",
         f"{config['dl_folder']}/{path_key}_dl/{dest_folder}/",
         "--input-file",
@@ -60,15 +58,14 @@ def build_command(
     ]
     if archive:
         command.extend(["--download-archive", f"archive/{archive}.sqlite3"])
-    if range_filter:
-        command.extend(["--filter", range_filter])
+    command.extend(parse_extra_flags(global_flags))
     command.extend(parse_extra_flags(extra_flags))
     return command
 
 
 def build_download_all_script(subs: dict[str, list], *, work_dir: str | None = None) -> str:
     work_dir = os.path.abspath(work_dir or os.getcwd())
-    rng = date_range_filter()
+    global_flags = global_flags_string("global-flags-subscriptions")
     jobs = [(name, tup) for name, tup in subs.items() if len(tup) >= 3]
     lines = [
         "@echo off",
@@ -90,8 +87,8 @@ def build_download_all_script(subs: dict[str, list], *, work_dir: str | None = N
             input_file=list_file,
             path_key="sub",
             archive=archive,
-            range_filter=rng,
             lists_dir=SUBSCRIPTION_LISTS_DIR,
+            global_flags=global_flags,
             extra_flags=extra_flags,
         )
         lines.append(echo_cmd_text(f"[{index}/{len(jobs)}] {sub_name}"))
