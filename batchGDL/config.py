@@ -40,8 +40,8 @@ def update_config(curr_version, new_version) -> None:
             data["download-jobs"] = {}
             data["download-jobs"]["single"] = tmp
             data["download-jobs"]["subscription"] = tmp2
-            data["global-flags-single"] = [f"--filter {tmp3}", f"--cookies-from-browser {tmp4}"]
-            data["global-flags-subscriptions"] = [f"--filter {tmp3}", f"--cookies-from-browser {tmp4}"]
+            data["global-flags-single"] = [f"--filter 'date >= datetime({tmp3}) or abort()' --cookies-from-browser {tmp4}"]
+            data["global-flags-subscriptions"] = [f"--filter 'date >= datetime({tmp3}) or abort()' --cookies-from-browser {tmp4}"]
 
             data.pop("single-lists")
             data.pop("subscriptions")
@@ -49,7 +49,7 @@ def update_config(curr_version, new_version) -> None:
             data.pop("cookies_browser")
             data.pop("#")
 
-            data["conf_ver"] = 2
+            data["config_ver"] = 2
             print("Config updated to v2.")
             curr_version = 2
 

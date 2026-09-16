@@ -45,11 +45,11 @@ def mark_setup_complete() -> None:
 def get_config_version() -> None:
     with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as fh:
         data = json.load(fh)
-    if "conf_ver" not in data:
+    if "config_ver" not in data:
         print(f"Updating config...")
         _cfg_module.update_config(0, CONFIG_VERSION)
-    elif data["conf_ver"] < CONFIG_VERSION:
+    elif data["config_ver"] < CONFIG_VERSION:
         print(f"Updating config...")
-        _cfg_module.update_config(data["conf_ver"], CONFIG_VERSION)
+        _cfg_module.update_config(data["config_ver"], CONFIG_VERSION)
 
-#    return data.get("conf_ver", 0) == _cfg_module.CONFIG_VERSION
+#    return data.get("config_ver", 0) == _cfg_module.CONFIG_VERSION
