@@ -1,6 +1,7 @@
 import json
 import os
 import shlex
+import shutil
 from time import sleep
 
 _PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,10 @@ def save_config() -> None:
         f.write("\n")
 
 def update_config(curr_version, new_version) -> None:
+    backup_path = f"{BATCHGDL_CONFIG_PATH}.v{curr_version}.bak"
+    shutil.copy(BATCHGDL_CONFIG_PATH, backup_path)
+    print(f"Config backup copied to {backup_path}")
+
     with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
 
