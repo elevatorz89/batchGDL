@@ -300,3 +300,49 @@ class ClearTrashModal(ModalScreen[bool]):
         else:
             self.app.notify("No trashed lists to delete.", severity="information")
         self.dismiss(True)
+
+
+class GlobalFlagsModal(ModalScreen[bool]):
+    BINDINGS = [Binding("escape", "cancel", "Cancel")]
+
+    def __init__(self, config_key: str, title: str) -> None:
+        super().__init__()
+        self.config_key = config_key
+        self.title_text = title
+
+    def _flags_value(self) -> str:
+        flags = config.get(self.config_key) or []
+        if isinstance(flags, str):
+            return flags
+        return " ".join(str(flag) for flag in flags)
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll(classes=_MODAL_SCROLL):
+            yield Label(self.title_text, classes="list-modal-title")
+            yield Label("Global flags")
+            yield Input(
+                value=self._flags_value(),
+                id="global-flags",
+                placeholder='e.g. --cookies-from-browser firefox',
+            )
+            with ItemGrid(classes="list-modal-actions", min_column_width=14):
+                yield Button("Save", id="global-flags-confirm", variant="primary")
+                yield Button("Cancel", id="global-flags-cancel")
+
+    def on_mount(self) -> None:
+        self.query_one("#global-flags", Input).focus()
+
+    def action_cancel(self) -> None:
+        self.dismiss(False)
+
+    @on(Button.Pressed, "#global-flags-cancel")
+    def on_cancel_pressed(self, event: Button.Pressed) -> None:
+        self.dismiss(False)
+
+    @on(Input.Submitted, "#global-flags")
+    @on(Button.Pressed, "#global-flags-confirm")
+    def on_submit(self, event: object) -> None:
+        value = self.query_one("#global-flags", Input).value.strip().replace('"', "'")
+        config[self.config_key] = [value] if value else []
+        save_config()
+        self.dismiss(True)

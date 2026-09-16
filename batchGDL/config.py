@@ -109,7 +109,7 @@ def parse_extra_flags(flags: str | None) -> list[str]:
 
 
 def with_optional_flags(base: list[str], flags: str) -> list[str]:
-    flags = flags.strip()
+    flags = flags.strip().replace('"', "'")
     if not flags:
         return base
     return [*base, flags]

@@ -16,7 +16,20 @@
   - [x] Nest both list types underneath a new `"download-jobs"` category
   - [x] Move the current daterange, cookies, and browser variables to global flags.
 - [ ] Figure out a "check for updates" button.
-- [ ] Figure out if auto-refreshing the config file is doable.
+
+### Added:
+- Global Flags
+  - You can now set default command line options for all download jobs within the single tab and subscriptions tab.
+- Config Updater
+  - If an update changes the config format (like this one, for example), your options will automatically be migrated to the new format.
+- 
+
+### Changes:
+- The daterange and cookies_browser options are no longer hardcoded into the downloader. Upon startup, they will be moved to the new global flags string.
+
+### Fixes:
+- Quotation marks (") will be replaced by apostrophes (') when saving global or optional flags.
+
 
 
 ## 0.2 - 2026/08/07

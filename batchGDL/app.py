@@ -20,7 +20,7 @@ from .config import (
 from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
 from .downloads import build_command, log_download_job, write_download_all_script
 from .lists import lists_txt_path, ensure_list_txt, list_file_is_empty
-from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal
+from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal, GlobalFlagsModal
 from .search import search
 from .system import open_editor, spawn_new_console, spawn_new_console_series
 
@@ -47,6 +47,7 @@ class GdlTui(App):
                 yield ItemGrid(
                     Button("Download", id="download-button", variant="primary"),
                     Button("Edit List", id="edit-list-button"),
+                    Button("Edit Global Flags", id="edit-global-flags-single-button"),
                     Button("Add List", id="add-list-button"),
                     Button("Delete List", id="delete-list-button", variant="error"),
                     Button("Refresh", id="refresh-lists-button"),
@@ -65,6 +66,7 @@ class GdlTui(App):
                     Button("Download", id="download-subscription-button", variant="primary"),
                     Button("Edit List", id="edit-subscription-list-button"),
                     Button("Edit Append List", id="edit-subscription-append-list-button"),
+                    Button("Edit Global Flags", id="edit-global-flags-subscriptions-button"),
                     Button("Add List", id="add-subscription-button"),
                     Button("Delete List", id="delete-subscription-button", variant="error"),
                     Button("Refresh", id="refresh-subscriptions-button"),
@@ -312,6 +314,13 @@ class GdlTui(App):
             ),
         )
 
+    @on(Button.Pressed, "#edit-global-flags-single-button")
+    def on_edit_global_flags_single_pressed(self, event: Button.Pressed) -> None:
+        self.push_screen(
+            GlobalFlagsModal("global-flags-single", "Edit Global Flags (Single)"),
+            lambda result: self.notify("Global flags updated.", severity="information") if result else None,
+        )
+
     @on(Button.Pressed, "#download-button")
     def on_download_pressed(self, event: Button.Pressed) -> None:
         name = self._require_selection(_LIST_SELECTION, "Select a list first.")
@@ -379,6 +388,13 @@ class GdlTui(App):
     def on_edit_subscription_append_list_pressed(self, event: Button.Pressed) -> None:
         self.ensure_append_list()
         self.open_lists_txt(_APPEND_LIST_NAME)
+
+    @on(Button.Pressed, "#edit-global-flags-subscriptions-button")
+    def on_edit_global_flags_subscriptions_pressed(self, event: Button.Pressed) -> None:
+        self.push_screen(
+            GlobalFlagsModal("global-flags-subscriptions", "Edit Global Flags (Subscriptions)"),
+            lambda result: self.notify("Global flags updated.", severity="information") if result else None,
+        )
 
     @on(Switch.Changed, "#append")
     def on_append_mode_changed(self, event: Switch.Changed) -> None:

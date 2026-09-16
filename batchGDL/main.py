@@ -35,7 +35,7 @@ if __name__ == "__main__":
         mark_setup_complete()
         reload_config()
 
-    #get_config_version() # launches the config updater
+    get_config_version() # launches the config updater
 
 
 
