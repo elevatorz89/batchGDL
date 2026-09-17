@@ -10,7 +10,6 @@ if __package__ is None and not getattr(sys, 'frozen', False):
 
 from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete, get_config_version
 from batchGDL.config import reload_config
-from batchGDL.constants import CONFIG_VERSION
 
 if __name__ == "__main__":
     missing = check_dependencies()

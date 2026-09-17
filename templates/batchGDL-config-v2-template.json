@@ -14,7 +14,7 @@
     "--cookies-from-browser firefox"
   ],
   "global-flags-subscriptions": [
-    "--cookies-from-browser firefox"
+    "--filter 'date >= datetime(YYYY, MM, DD) or abort()' --cookies-from-browser firefox"
   ],
   "config_ver": 2
 }

@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+import urllib.request
 
 from textual import on
 from textual.app import App, ComposeResult
@@ -17,7 +18,7 @@ from .config import (
     job_section, oauth_sites, oauth_option_labels, single_list_option_labels,
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
-from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APP_VERSION
+from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APP_VERSION, GITHUB_REPO
 from .downloads import build_command, log_download_job, write_download_all_script
 from .lists import lists_txt_path, ensure_list_txt, list_file_is_empty
 from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal, GlobalFlagsModal
@@ -26,6 +27,10 @@ from .system import open_editor, spawn_new_console, spawn_new_console_series
 
 _APPEND_LIST_NAME = "#append"
 _DOWNLOAD_ALL_LABEL = "-Download All-"
+
+
+def version_tuple(version: str) -> tuple[int, ...]:
+    return tuple(int(part) for part in version.lstrip("v").split("."))
 
 _LIST_SELECTION = "#list-selection"
 _SUBSCRIPTION_SELECTION = "#subscription-selection"
@@ -87,6 +92,7 @@ class GdlTui(App):
                     Button("Edit Gallery DL Config", id="edit-gdl-config-button"),
                     Button("Open Log File", id="open-log-file-button"),
                     Button("Update Gallery-DL", id="update-gdl-button"),
+                    Button("Check for batchGDL update", id="check-updates-button"),
                     Button("Refresh Config", id="refresh-config-button"),
                     Button("Delete Trashed Lists", id="delete-trashed-lists-button", variant="error"),
                     id="config-actions",
@@ -524,6 +530,33 @@ class GdlTui(App):
             )
         except Exception as e:
             self.notify(f"Error opening updater: {e}", severity="error")
+
+    
+    @on(Button.Pressed, "#check-updates-button")
+    def on_check_updates_pressed(self, event: Button.Pressed) -> None:
+        url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "batchGDL"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                release = json.load(resp)
+        except Exception as e:
+            self.notify(f"Could not check for updates: {e}", severity="error")
+            return
+        latest = str(release.get("tag_name", "")).lstrip("v")
+        html_url = release.get("html_url") or f"https://github.com/{GITHUB_REPO}/releases/latest"
+        try:
+            outdated = version_tuple(APP_VERSION) < version_tuple(latest)
+        except ValueError:
+            self.notify(f"Could not compare versions ({APP_VERSION} vs {latest}).", severity="error")
+            return
+        if outdated:
+            self.notify(
+                f'v{latest} is available. [link="{html_url}"]Open release page[/link]',
+                severity="warning",
+                timeout=10,
+            )
+            return
+        self.notify(f"You're on the latest version ({APP_VERSION}).")
 
     def selected_oauth_sites(self) -> list[str]:
         prompt = self._selected_option_prompt(_OAUTH_SITE_LIST)

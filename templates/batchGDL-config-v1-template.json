@@ -1,0 +1,15 @@
+{
+  "daterange": "YYYY, MM, DD",
+  "config_file": "gdl-config.json",
+  "log_file": "logfile_latest.txt",
+  "cookies_browser": "firefox",
+  "dl_folder": "downloads/",
+  "setup": "true",
+  "#": "Format: single-lists [list_file, dest_folder, optional_flags]; subscriptions [category, list_file, archive, optional_flags]. Optional flags are one string. Make sure to escape special characters with backslashes.",
+  "single-lists": {},
+  "subscriptions": {},
+  "oauth-sites": [
+    ""
+  ],
+  "config_ver": 1
+}

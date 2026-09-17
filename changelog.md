@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.1 - 2026/09/XX
+## 0.2.1 - 2026/09/1x
 ### TODO:
 - [x] Global flags options for both single and subscription lists.
 - [x] Config Changes
@@ -11,7 +11,15 @@
   - [x] Change `"single-lists":` to `"single":`
   - [x] Nest both list types underneath a new `"download-jobs"` category
   - [x] Move the current daterange, cookies, and browser variables to global flags.
-- [ ] Figure out a "check for updates" button.
+- [x] Figure out a "check for updates" button.
+- [ ] Fix mark_setup_complete()
+- [ ] See if the default subscription global flags cause an error
+- [x] Test config updater on the template (might crash)
+- [ ] Rewrite config-help
+- [ ] Rewrite readme
+
+### Breaking Changes:
+- The config file format has been updated. Old config files will be updated upon your next launch of the app.
 
 ### Added:
 - Global Flags
@@ -19,10 +27,11 @@
 - Config Updater
   - If an update changes the config format (like this one, for example), your options will automatically be migrated to the new format.
   - A backup copy of the original config will be made prior to the update.
-- ~~Check for updates button~~
+- You can now check for program updates in the config tab.
 
 ### Changes:
 - The daterange and cookies_browser options are no longer hardcoded into the downloader. Upon startup, they will be moved to the new global flags string.
+  - The single tab will only receive the cookies_browser variable from the config update. 
 
 ### Fixes:
 - Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.

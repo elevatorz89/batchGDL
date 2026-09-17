@@ -52,7 +52,7 @@ def update_config(curr_version, new_version) -> None:
             data.pop("subscriptions")
             data.pop("daterange")
             data.pop("cookies_browser")
-            data.pop("#")
+            data.pop("#", None)
 
             data["config_ver"] = 2
             print("Config updated to v2.")

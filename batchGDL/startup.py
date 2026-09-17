@@ -4,7 +4,7 @@ import importlib.util
 
 from . import config as _cfg_module
 from .config import BATCHGDL_CONFIG_PATH
-from constants import CONFIG_VERSION
+from .constants import CONFIG_VERSION
 
 
 def check_dependencies() -> list[str]:
