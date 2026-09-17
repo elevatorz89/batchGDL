@@ -1,5 +1,5 @@
 {
-  "daterange": "YYYY, MM, DD",
+  "daterange": "1970, 1, 1",
   "config_file": "gdl-config.json",
   "log_file": "logfile_latest.txt",
   "cookies_browser": "firefox",

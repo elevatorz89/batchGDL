@@ -13,10 +13,12 @@
   - [x] Move the current daterange, cookies, and browser variables to global flags.
 - [x] Figure out a "check for updates" button.
 - [x] Fix mark_setup_complete()
-- [ ] See if the default subscription global flags cause an error
+- [x] See if the default subscription global flags cause an error
+- [x] Fix invalid date string
 - [x] Test config updater on the template (might crash)
-- [ ] Rewrite config-help
-- [ ] Rewrite readme
+- [x] Rewrite config-help
+- [x] Rewrite readme
+- [ ] Test updater on your own config.
 
 ### Breaking Changes:
 - The config file format has been updated. Old config files will be updated upon your next launch of the app.
