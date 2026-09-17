@@ -39,8 +39,8 @@ def mark_setup_complete() -> None:
     with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as fh:
         data = json.load(fh)
     data["setup"] = "true"
-    _cfg_module.config.clear()
-    _cfg_module.config.update(data)
+    _cfg_module.config["setup"] = "true"
+    _cfg_module.save_config()
 
 def get_config_version() -> None:
     with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as fh:

@@ -12,7 +12,7 @@
   - [x] Nest both list types underneath a new `"download-jobs"` category
   - [x] Move the current daterange, cookies, and browser variables to global flags.
 - [x] Figure out a "check for updates" button.
-- [ ] Fix mark_setup_complete()
+- [x] Fix mark_setup_complete()
 - [ ] See if the default subscription global flags cause an error
 - [x] Test config updater on the template (might crash)
 - [ ] Rewrite config-help
