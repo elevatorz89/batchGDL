@@ -36,6 +36,7 @@ Download lists are formatted like so:
 
 - `list_file` - Filename of the job's list file. (no extension)
 - `dest_folder` - The job's download subfolder. (located underneath `dl_folder`)
+  - If you want to group certain download jobs together (e.g. Fantasy Art) then you could give every download job in this "category" the same destination folder.
 - `archive` - Filename of the job's archive file. (no extension)
 - `optional_flags` - Extra flags to use for this download job.
 
