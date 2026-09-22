@@ -1,24 +1,5 @@
 # Changelog
-## 0.2.1 - 2026/09/21
-### TODO:
-- [x] Global flags options for both single and subscription lists.
-- [x] Config Changes
-  - [x] Updater
-    - [x] Make a config updater that runs upon startup
-    - [x] Append a config version variable to the config file
-    - [x] Before an update, make a backup of the previous config file
-  - [x] Change `"single-lists":` to `"single":`
-  - [x] Nest both list types underneath a new `"download-jobs"` category
-  - [x] Move the current daterange, cookies, and browser variables to global flags.
-- [x] Figure out a "check for updates" button.
-- [x] Fix mark_setup_complete()
-- [x] See if the default subscription global flags cause an error
-- [x] Fix invalid date string
-- [x] Test config updater on the template (might crash)
-- [x] Rewrite config-help
-- [x] Rewrite readme
-- [x] Test updater on your own config.
-- [x] Fix download all on linux/macos
+## 0.2.1 - 2026/09/22
 
 ### Breaking Changes:
 - The config file format has been updated. Old config files will be updated upon your next launch of the app.
