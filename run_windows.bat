@@ -1,3 +1,8 @@
 @echo off
 cd /d "%~dp0"
-wt -d "%CD%" cmd /k python batchGDL/main.py
+where wt >nul 2>nul
+if %errorlevel%==0 (
+    wt -d "%CD%" cmd
+) else (
+    cmd
+)

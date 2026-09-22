@@ -19,6 +19,7 @@
 - The Download All option in the subscription tab now works properly on Linux and MacOS.
 - The search tab can now search lists in both download tabs, like originally intended.
 - Download jobs no longer close the terminal instantly. They will now prompt for user input before closing.
+- Windows batch file now falls back to cmd if Windows Terminal isn't installed.
 
 ## 0.2 - 2026/08/07
 
