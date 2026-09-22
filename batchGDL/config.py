@@ -33,28 +33,27 @@ def update_config(curr_version, new_version) -> None:
 
     while curr_version < new_version:
         if curr_version == 0:
-            print ("v1 Config Detected.")
+            print ("Found v1 config.")
             curr_version = 1
         if curr_version == 1:
-            tmp = data["single-lists"]
-            tmp2 = data["subscriptions"]
-            tmp3 = data["daterange"]
-            tmp4 = data["cookies_browser"]
+            tmp = data.get("single-lists") or {}
+            tmp2 = data.get("subscriptions") or {}
+            tmp3 = (data.get("daterange") or "").strip()
+            tmp4 = (data.get("cookies_browser") or "").strip()
 
-            data["download-jobs"] = {}
-            data["download-jobs"]["single"] = tmp
-            data["download-jobs"]["subscription"] = tmp2
+            data["download-jobs"] = {
+                "single": tmp,
+                "subscription": tmp2,
+            }
+
             data["global-flags-single"] = [f"--cookies-from-browser {tmp4}"]
             data["global-flags-subscriptions"] = [f"--filter 'date >= datetime({tmp3}) or abort()' --cookies-from-browser {tmp4}"]
 
-            data.pop("single-lists")
-            data.pop("subscriptions")
-            data.pop("daterange")
-            data.pop("cookies_browser")
-            data.pop("#", None)
+            for key in ["single-lists", "subscriptions", "daterange", "cookies_browser"]:
+                data.pop(key, None)
 
             data["config_ver"] = 2
-            print("Config updated to v2.")
+            print("Updated config to v2.")
             curr_version = 2
 
     with open(BATCHGDL_CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -62,6 +61,7 @@ def update_config(curr_version, new_version) -> None:
         f.write("\n")
     config.clear()
     config.update(data)
+    print("Config up to date.")
     sleep(3)
 
 
