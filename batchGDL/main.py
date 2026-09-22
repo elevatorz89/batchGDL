@@ -37,5 +37,5 @@ if __name__ == "__main__":
         
 
     get_config_version() # launches the config updater
-    clear_download_temp_scripts() # clears pycache files
+    clear_download_temp_scripts() # clears temp download files
     GdlTui().run() # launches the app
