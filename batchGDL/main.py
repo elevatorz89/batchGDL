@@ -1,11 +1,12 @@
+import os
 import sys
 import subprocess
 
-if __package__ is None and not getattr(sys, 'frozen', False):
-    # direct call of __main__.py
-    import os.path
-    path = os.path.realpath(os.path.abspath(__file__))
-    sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
+_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(os.path.abspath(__file__))))
+if __package__ is None and not getattr(sys, "frozen", False):
+    # direct call of main.py
+    sys.path.insert(0, _ROOT)
+os.chdir(_ROOT)
 
 
 from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete, get_config_version
