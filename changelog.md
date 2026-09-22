@@ -38,6 +38,7 @@
 ### Fixes:
 - Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.
 - The Download All option in the subscription tab now works properly on Linux and MacOS.
+- The search tab can now search lists in both download tabs, like originally intended.
 
 
 ## 0.2 - 2026/08/07

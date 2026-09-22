@@ -492,10 +492,6 @@ class GdlTui(App):
     def on_search_submitted(self, event: Input.Submitted) -> None:
         self.run_search()
 
-    @on(Button.Pressed, "#search-button")
-    def on_search_button_pressed(self, event: Button.Pressed) -> None:
-        self.run_search()
-
     ############################ Config ############################
 
     @on(Button.Pressed, "#refresh-lists-button")

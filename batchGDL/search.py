@@ -2,11 +2,12 @@ import os
 
 from rapidfuzz import fuzz
 
-from .constants import SUBSCRIPTION_LISTS_DIR
+from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
 
 _MIN_SCORE = 0.68
 _WORD_FUZZ_CUTOFF = 86.0
 _LINE_FUZZ_CUTOFF = 78.0
+_SEARCH_DIRS = (SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR)
 
 
 def _single_word_score(word: str, line_lower: str) -> float:
@@ -48,29 +49,34 @@ def _line_relevance(term_lower: str, line_lower: str) -> float:
 
 
 def search(term: str) -> list[dict]:
-    if not os.path.isdir(SUBSCRIPTION_LISTS_DIR):
-        return []
-
     term_lower = term.lower().strip()
     scored: list[tuple[float, dict]] = []
 
-    for fname in sorted(os.listdir(SUBSCRIPTION_LISTS_DIR)):
-        if not fname.lower().endswith(".txt"):
+    for lists_dir in _SEARCH_DIRS:
+        if not os.path.isdir(lists_dir):
             continue
-        path = os.path.join(SUBSCRIPTION_LISTS_DIR, fname)
-        with open(path, encoding="utf-8", errors="ignore") as fh:
-            for lineno, raw_line in enumerate(fh, start=1):
-                line = raw_line.strip()
-                if not line:
-                    continue
-                score = _line_relevance(term_lower, line.lower())
-                if score >= _MIN_SCORE:
-                    scored.append(
-                        (
-                            score,
-                            {"file": fname, "line_number": lineno, "line": line},
+        folder = os.path.basename(lists_dir)
+        for fname in sorted(os.listdir(lists_dir)):
+            if not fname.lower().endswith(".txt"):
+                continue
+            path = os.path.join(lists_dir, fname)
+            with open(path, encoding="utf-8", errors="ignore") as fh:
+                for lineno, raw_line in enumerate(fh, start=1):
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    score = _line_relevance(term_lower, line.lower())
+                    if score >= _MIN_SCORE:
+                        scored.append(
+                            (
+                                score,
+                                {
+                                    "file": f"{folder}/{fname}",
+                                    "line_number": lineno,
+                                    "line": line,
+                                },
+                            )
                         )
-                    )
 
     scored.sort(key=lambda item: (-item[0], item[1]["file"], item[1]["line_number"]))
     return [hit for _, hit in scored]
