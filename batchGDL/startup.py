@@ -36,9 +36,6 @@ def check_setup() -> bool:
 
 
 def mark_setup_complete() -> None:
-    with open(BATCHGDL_CONFIG_PATH, "r", encoding="utf-8") as fh:
-        data = json.load(fh)
-    data["setup"] = "true"
     _cfg_module.config["setup"] = "true"
     _cfg_module.save_config()
 

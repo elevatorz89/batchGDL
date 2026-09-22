@@ -1,6 +1,5 @@
 # Changelog
-
-## 0.2.1 - 2026/09/1x
+## 0.2.1 - 2026/09/21
 ### TODO:
 - [x] Global flags options for both single and subscription lists.
 - [x] Config Changes
@@ -18,7 +17,8 @@
 - [x] Test config updater on the template (might crash)
 - [x] Rewrite config-help
 - [x] Rewrite readme
-- [ ] Test updater on your own config.
+- [x] Test updater on your own config.
+- [x] Fix download all on linux/macos
 
 ### Breaking Changes:
 - The config file format has been updated. Old config files will be updated upon your next launch of the app.
@@ -37,7 +37,7 @@
 
 ### Fixes:
 - Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.
-
+- The Download All option in the subscription tab now works properly on Linux and MacOS.
 
 
 ## 0.2 - 2026/08/07

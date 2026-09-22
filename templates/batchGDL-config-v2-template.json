@@ -2,7 +2,7 @@
   "config_file": "gdl-config.json",
   "log_file": "logfile_latest.txt",
   "dl_folder": "downloads/",
-  "setup": "true",
+  "setup": "false",
   "oauth-sites": [
     ""
   ],

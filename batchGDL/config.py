@@ -32,7 +32,6 @@ def update_config(curr_version, new_version) -> None:
         data = json.load(f)
 
     while curr_version < new_version:
-        sleep(1)
         if curr_version == 0:
             print ("v1 Config Detected.")
             curr_version = 1
@@ -63,6 +62,7 @@ def update_config(curr_version, new_version) -> None:
         f.write("\n")
     config.clear()
     config.update(data)
+    sleep(3)
 
 
     #config[key] = value

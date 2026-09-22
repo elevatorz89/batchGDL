@@ -1,6 +1,7 @@
 tests/
 .venv/
 .idea/
+*.bak
 __pycache__/
 _versions/
 

@@ -19,7 +19,7 @@ from .config import (
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
 from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APP_VERSION, GITHUB_REPO
-from .downloads import build_command, log_download_job, write_download_all_script
+from .downloads import build_command, build_download_all_command, log_download_job
 from .lists import lists_txt_path, ensure_list_txt, list_file_is_empty
 from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal, GlobalFlagsModal
 from .search import search
@@ -428,9 +428,8 @@ class GdlTui(App):
                     f"Skipping {skipped} empty subscription list(s).",
                     severity="warning",
                 )
-            script_path = write_download_all_script(nonempty, work_dir=os.getcwd())
             self.notify("Downloading from all lists in a new terminal…", severity="information")
-            spawn_new_console(["cmd", "/c", "call", script_path], cwd=os.getcwd())
+            spawn_new_console(build_download_all_command(nonempty, work_dir=os.getcwd()), cwd=os.getcwd())
             return
 
         subscription = self._subscription_entry(name)

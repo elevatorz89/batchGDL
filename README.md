@@ -4,7 +4,8 @@ A simple TUI for managing gallery-dl subscriptions with a simple interface, writ
 # Features
 - Manage independent download lists and subscriptions independently of each other.
 - An "append mode" that lets you redownload an entire subscription while ignoring the archive file. 
-- Apply additional flags per download job
+- Apply persistent flags per tab.
+- Apply additional flags per download job.
 - Search through your download job files from within the TUI.
 - Shortcut buttons to config/log files.
 - Update gallery-dl without using the command line.
@@ -26,7 +27,7 @@ Download and unpack the zip file from the releases page. After doing so, edit th
 - `config_file` - Path to your gallery-dl config file. (include the file extension)
 - `log_file` - Path to your gallery-dl logs file.
 - `dl_folder` - Path to a folder to store your downloaded media.
-- `oauth-sites` - A comma separated list of sites that require OAuth to download (protected) media.
+- `oauth-sites` - A comma separated array of sites that require OAuth to download (protected) media.
 
 By default, the file paths will point relative to the script folder.
 

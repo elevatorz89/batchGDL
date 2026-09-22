@@ -125,29 +125,3 @@ def spawn_new_console(command: list[str], *, cwd: str | None = None) -> None:
 
 def spawn_new_console_series(command: list[str], *, cwd: str | None = None) -> int:
     return _new_console_process(command, cwd=cwd).wait()
-
-
-def quote_cmd_arg(arg: str) -> str:
-    if not arg:
-        return '""'
-    escaped = arg.replace("%", "%%")
-    if not any(ch in escaped for ch in ' \t&|()<>^"%!'):
-        return escaped
-    return f'"{escaped.replace(chr(34), chr(34) * 2)}"'
-
-
-def join_cmd_args(args: list[str]) -> str:
-    return " ".join(quote_cmd_arg(a) for a in args)
-
-
-def echo_cmd_text(text: str) -> str:
-    escaped = (
-        text.replace("^", "^^")
-        .replace("%", "%%")
-        .replace("&", "^&")
-        .replace("|", "^|")
-        .replace("<", "^<")
-        .replace(">", "^>")
-        .replace('"', "'")
-    )
-    return f"echo {escaped}"

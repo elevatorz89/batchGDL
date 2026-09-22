@@ -4,19 +4,33 @@
 - `log_file` - Path to your gallery-dl logs file.
 - `dl_folder` - Path to a folder to store your downloaded media. Changing this will not reset the download state of a subscription.
 - `setup` - Checks if you've used batchGDL before. This prompts new users to edit the config file on the first launch.
-- `oauth-sites` - A comma separated list of sites that require OAuth to download (protected) media.
+- `oauth-sites` - An array of sites that require OAuth to download (protected) media.
 - `download-jobs`
-  - `single-lists` - A list of your singles tab download jobs and their config.
-  - `subscriptions` - A list of your subscription tab download jobs and their config.
+  - `single` - A list of your "single" tab download jobs and their config.
+  - `subscription` - A list of your subscription tab download jobs and their config.
 - `global-flags-single` - Extra flags applied to every download job in the singles tab.
 - `global-flags-subscriptions` - Extra flags applied to every download job in the subscription tab.
 - `config_ver` - The version of the config file format. (Don't modify this.)
 
 Download lists are formatted like so:
 ```
-"download-jobs": {
-  "single-lists" {["list_file", "dest_folder", "optional_flags"],}
-  "subscriptions": {["list_file", "dest_folder", "archive", "optional_flags"],}
+{
+  "download-jobs": {
+    "single":{
+      "list_one_name":[
+          "list_file", 
+          "dest_folder", 
+          "optional_flags"
+          ],
+      }
+    "subscription": {
+      "subscription_one_name":
+        ["list_file", 
+        "dest_folder", 
+        "archive", 
+        "optional_flags"],
+      }
+  }
 }
 ```
 
@@ -31,7 +45,7 @@ Download lists are formatted like so:
   "config_file": "gdl-config.json",
   "log_file": "logfile_latest.txt",
   "dl_folder": "downloads/",
-  "setup": "true",
+  "setup": "false",
   "oauth-sites": [
     ""
   ],

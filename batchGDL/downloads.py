@@ -1,12 +1,19 @@
 import os
+import subprocess
 import sys
 import tempfile
 from datetime import datetime
 
-from .config import config, config_file_path, entry_extra_flags, global_flags_string, parse_extra_flags
+from .config import (
+    config,
+    config_file_path,
+    entry_extra_flags,
+    global_flags_string,
+    parse_extra_flags,
+    reload_config,
+)
 from .constants import SUBSCRIPTION_LISTS_DIR
 from .lists import lists_txt_path
-from .system import echo_cmd_text, join_cmd_args
 
 
 def log_file_path() -> str:
@@ -21,20 +28,6 @@ def log_download_job(job_name: str) -> None:
     os.makedirs(parent, exist_ok=True)
     with open(path, "a", encoding="utf-8") as fh:
         fh.write(entry)
-
-
-def log_download_job_cmd(job_name: str) -> str:
-    path = os.path.abspath(log_file_path())
-    py = (
-        "from datetime import datetime;"
-        f"p={path!r};"
-        f"n={job_name!r};"
-        "open(p,'a',encoding='utf-8').write("
-        "'\\n-----[Download job '+chr(34)+n+chr(34)+' at '+"
-        "datetime.now().isoformat(sep=' ',timespec='seconds')"
-        "+']-----\\n')"
-    )
-    return join_cmd_args([sys.executable, "-c", py])
 
 
 def build_command(
@@ -63,50 +56,71 @@ def build_command(
     return command
 
 
-def build_download_all_script(subs: dict[str, list], *, work_dir: str | None = None) -> str:
-    work_dir = os.path.abspath(work_dir or os.getcwd())
+def _download_all_jobs(subs: dict[str, list]) -> list[tuple[str, list[str]]]:
     global_flags = global_flags_string("global-flags-subscriptions")
-    jobs = [(name, tup) for name, tup in subs.items() if len(tup) >= 3]
-    lines = [
-        "@echo off",
-        "setlocal",
-        f'cd /d "{work_dir}"',
-        "if errorlevel 1 (",
-        echo_cmd_text(f"Failed to cd to {work_dir}"),
-        "pause",
-        "exit /b 1",
-        ")",
-        echo_cmd_text(f"Download All: {len(jobs)} subscription(s)"),
-        "echo.",
-    ]
-    for index, (sub_name, tup) in enumerate(jobs, start=1):
+    jobs: list[tuple[str, list[str]]] = []
+    for name, tup in subs.items():
+        if len(tup) < 3:
+            continue
         dest_folder, list_file, archive = tup[0], tup[1], tup[2]
-        extra_flags = entry_extra_flags(tup, 3)
-        command = build_command(
-            dest_folder=dest_folder,
-            input_file=list_file,
-            path_key="sub",
-            archive=archive,
-            lists_dir=SUBSCRIPTION_LISTS_DIR,
-            global_flags=global_flags,
-            extra_flags=extra_flags,
+        jobs.append(
+            (
+                name,
+                build_command(
+                    dest_folder=dest_folder,
+                    input_file=list_file,
+                    path_key="sub",
+                    archive=archive,
+                    lists_dir=SUBSCRIPTION_LISTS_DIR,
+                    global_flags=global_flags,
+                    extra_flags=entry_extra_flags(tup, 3),
+                ),
+            )
         )
-        lines.append(echo_cmd_text(f"[{index}/{len(jobs)}] {sub_name}"))
-        lines.append(log_download_job_cmd(sub_name))
-        lines.append(join_cmd_args(command))
-        lines.append("if errorlevel 1 echo Job failed, continuing...")
-        lines.append("echo.")
-    lines.extend(
-        [
-            echo_cmd_text(f"Download All finished ({len(jobs)} subscription(s))."),
-            "pause",
-        ]
-    )
-    return "\n".join(lines)
+    return jobs
 
 
-def write_download_all_script(subs: dict[str, list], *, work_dir: str | None = None) -> str:
-    fd, path = tempfile.mkstemp(prefix="batchGDL_download_all_", suffix=".cmd")
-    with os.fdopen(fd, "w", encoding="utf-8", newline="\r\n") as fh:
-        fh.write(build_download_all_script(subs, work_dir=work_dir))
-    return path
+def _pause() -> None:
+    try:
+        input("Press Enter to close...")
+    except EOFError:
+        pass
+
+
+def run_download_all(jobs: list[tuple[str, list[str]]], work_dir: str) -> None:
+    reload_config()
+    try:
+        os.chdir(work_dir)
+    except OSError:
+        print(f"Failed to cd to {work_dir}")
+        _pause()
+        raise SystemExit(1)
+
+    print(f"Download All: {len(jobs)} subscription(s)")
+    print()
+    for index, (name, command) in enumerate(jobs, start=1):
+        print(f"[{index}/{len(jobs)}] {name}")
+        try:
+            log_download_job(name)
+        except OSError as e:
+            print(f"Could not write log header: {e}")
+        if subprocess.run(command).returncode != 0:
+            print("Job failed, continuing...")
+        print()
+    print(f"Download All finished ({len(jobs)} subscription(s)).")
+    _pause()
+
+
+def build_download_all_command(subs: dict[str, list], *, work_dir: str | None = None) -> list[str]:
+    work_dir = os.path.abspath(work_dir or os.getcwd())
+    jobs = _download_all_jobs(subs)
+    package_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    fd, path = tempfile.mkstemp(prefix="batchGDL_download_all_", suffix=".py")
+    with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(
+            "import sys\n"
+            f"sys.path.insert(0, {package_root!r})\n"
+            "from batchGDL.downloads import run_download_all\n"
+            f"run_download_all({jobs!r}, {work_dir!r})\n"
+        )
+    return [sys.executable, path]
