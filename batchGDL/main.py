@@ -29,10 +29,11 @@ if __name__ == "__main__":
 
     if not check_setup():
         print("\n---")
-        print("Make sure to open the readme and (if necessary) edit the first 5 lines in the batchGDL-config.json file before continuing.")
+        print("Make sure to read the readme and config-help.md, then edit batchGDL-config.json before continuing.")
         input("Once you've made your edits, press ENTER to continue.")
-        mark_setup_complete()
         reload_config()
+        mark_setup_complete()
+        
 
     get_config_version() # launches the config updater
 
