@@ -12,13 +12,18 @@ ItemGrid {
     align: left middle;
     content-align: center middle;
     width: auto;
-    margin-top: 1
+    margin-top: 1;
+    margin-left: 4;
 }
 
-#append-mode-label{
+#append-mode-label, #ignore-archive-label {
     height: 3;
     content-align: center middle;
     width: auto;
+}
+
+#ignore-archive-label {
+    margin-left: 2;
 }
 
 

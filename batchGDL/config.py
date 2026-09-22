@@ -118,6 +118,23 @@ def parse_extra_flags(flags: str | None) -> list[str]:
         return str(flags).split()
 
 
+def flags_without_option(flags: str | None, option: str) -> str:
+    parts = parse_extra_flags(flags)
+    out: list[str] = []
+    skip_next = False
+    for part in parts:
+        if skip_next:
+            skip_next = False
+            continue
+        if part == option:
+            skip_next = True
+            continue
+        if part.startswith(f"{option}="):
+            continue
+        out.append(part)
+    return shlex.join(out)
+
+
 def with_optional_flags(base: list[str], flags: str) -> list[str]:
     flags = flags.strip().replace('"', "'")
     if not flags:

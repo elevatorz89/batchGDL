@@ -13,6 +13,7 @@
   - If an update changes the config format (like this one, for example), your options will automatically be migrated to the new format.
   - A backup copy of the original config will be made prior to the update.
 - You can now check for program updates in the config tab.
+- An "Ignore Archive" toggle has been added to the Subscriptions tab. (Can only be enabled when Append Mode is on.)
 
 ### Fixes:
 - Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.
@@ -20,6 +21,7 @@
 - The search tab can now search lists in both download tabs, like originally intended.
 - Download jobs no longer close the terminal instantly. They will now prompt for user input before closing.
 - Windows batch file now falls back to cmd if Windows Terminal isn't installed.
+- Append mode changed to strip `--filter` from subscription global flags. It functionally works the same as it did in 0.2. You can override this by re-adding it into job-specific flags, if you wish.
 
 ## 0.2 - 2026/08/07
 

@@ -14,7 +14,7 @@ from textual.widgets import (
 )
 
 from .config import (
-    config, reload_config, entry_extra_flags, global_flags_string,
+    config, reload_config, entry_extra_flags, flags_without_option, global_flags_string,
     job_section, oauth_sites, oauth_option_labels, single_list_option_labels,
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
@@ -65,7 +65,9 @@ class GdlTui(App):
                 yield Horizontal(
                     Static("Append Mode: ", id="append-mode-label"),
                     Switch(id="append"),
-                    id="subs-horizontal"
+                    Static("Ignore archive: ", id="ignore-archive-label"),
+                    Switch(id="ignore-archive", disabled=True),
+                    id="subs-horizontal",
                 )
                 yield ItemGrid(
                     Button("Download", id="download-subscription-button", variant="primary"),
@@ -109,6 +111,14 @@ class GdlTui(App):
 
     def on_mount(self) -> None:
         self.title = f"batchGDL v{APP_VERSION}"
+        self._sync_ignore_archive_switch()
+
+    def _sync_ignore_archive_switch(self) -> None:
+        append_on = self.query_one("#append", Switch).value
+        ignore_archive = self.query_one("#ignore-archive", Switch)
+        if not append_on:
+            ignore_archive.value = False
+        ignore_archive.disabled = not append_on
 
     def _selected_option_prompt(self, option_list_id: str) -> str | None:
         option = self.query_one(option_list_id, OptionList).highlighted_option
@@ -401,6 +411,7 @@ class GdlTui(App):
     def on_append_mode_changed(self, event: Switch.Changed) -> None:
         if event.value:
             self.ensure_append_list()
+        self._sync_ignore_archive_switch()
 
     @on(Button.Pressed, "#download-subscription-button")
     def on_download_subscription_pressed(self, event: Button.Pressed) -> None:
@@ -454,12 +465,20 @@ class GdlTui(App):
         if not self._require_nonempty_list(input_file, lists_dir=SUBSCRIPTION_LISTS_DIR, label=label):
             return
 
+        global_flags = global_flags_string("global-flags-subscriptions")
+        if append:
+            global_flags = flags_without_option(global_flags, "--filter")
+
+        use_archive = archive
+        if append and self.query_one("#ignore-archive", Switch).value:
+            use_archive = None
+
         self.run_download(
             dest_folder=dest_folder,
             input_file=input_file,
             path_key="sub",
-            archive=archive,
-            global_flags=global_flags_string("global-flags-subscriptions"),
+            archive=use_archive,
+            global_flags=global_flags,
             extra_flags=extra_flags,
             job_name=job_name,
             notify_message=f"Starting download for {name}.",

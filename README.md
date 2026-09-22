@@ -48,12 +48,12 @@ If a gallery-dl update fixes an issue, you can update it from the Config tab.
 
 # FAQ
 - What does the "Append Mode" switch do on the Subscription tab?
-	- By default, subscriptions will record each downloaded link in its archive file. Append Mode will ignore this file and download everything in the Append List.
-	- Append mode will adopt the download location and extra flags of the selected subscription.
-	- If you want to perform a one-off download of something specific, it's better to make a list in the "Single" tab and download using that.
+  - Append mode downloads from the Append List instead of the subscription list. This is useful if you want to add more links to a subscription and *only download the new links.* To enable this behavior, it will strip `--filter` from the subscription global flags to ensure that it will not skip any media.
+  - If you want to also ignore the subscription's archive file, you can toggle the "Ignore Archive" switch.
+  - If you want to perform a one-off download of something specific, it's better to make a list in the "Single" tab and download using that.
 - How do I restore a list from the trash?
-	- Deleted lists are stored in your `lists/trash` folder.
-	- Move the list back to the single or subscriptions folder, then re-create the entry with the "Add List" button. Make sure that the list filename matches, or it won't relink.
+  - Deleted lists are stored in your `lists/trash` folder.
+  - Move the list back to the single or subscriptions folder, then re-create the entry with the "Add List" button. Make sure that the list filename matches, or it won't relink.
 - I can't download things from a particular site.
   - This is most likely an issue with gallery-dl. Try updating it from the Config tab, then file an issue on their [GitHub](https://github.com/mikf/gallery-dl) or [Codeberg](https://codeberg.org/mikf/gallery-dl) page if the issue persists.
   - Sometimes, sites may require you to provide cookies, an API key, or for you to log in using OAuth.
