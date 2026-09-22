@@ -22,6 +22,8 @@
 
 ### Breaking Changes:
 - The config file format has been updated. Old config files will be updated upon your next launch of the app.
+  - The daterange and cookies_browser options are no longer hardcoded into the downloader. Upon startup, they will be moved to the new global flags string.
+    - The single tab will only receive the cookies_browser variable from the config update. 
 
 ### Added:
 - Global Flags
@@ -31,15 +33,12 @@
   - A backup copy of the original config will be made prior to the update.
 - You can now check for program updates in the config tab.
 
-### Changes:
-- The daterange and cookies_browser options are no longer hardcoded into the downloader. Upon startup, they will be moved to the new global flags string.
-  - The single tab will only receive the cookies_browser variable from the config update. 
-
 ### Fixes:
 - Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.
 - The Download All option in the subscription tab now works properly on Linux and MacOS.
 - The search tab can now search lists in both download tabs, like originally intended.
-
+- Download jobs no longer close the terminal instantly. They will now prompt for user input before closing.
+- Pycache is cleared on every launch.
 
 ## 0.2 - 2026/08/07
 

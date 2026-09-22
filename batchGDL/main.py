@@ -9,7 +9,7 @@ if __package__ is None and not getattr(sys, "frozen", False):
 os.chdir(_ROOT)
 
 
-from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete, get_config_version
+from batchGDL.startup import check_dependencies, check_setup, mark_setup_complete, get_config_version, clear_download_temp_scripts
 from batchGDL.config import reload_config
 
 if __name__ == "__main__":
@@ -37,7 +37,5 @@ if __name__ == "__main__":
         
 
     get_config_version() # launches the config updater
-
-
-
-    GdlTui().run()
+    clear_download_temp_scripts() # clears pycache files
+    GdlTui().run() # launches the app
