@@ -19,7 +19,7 @@ from .config import (
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
 from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APP_VERSION, GITHUB_REPO
-from .downloads import build_command, build_download_all_command, log_download_job
+from .downloads import build_command, build_download_all_command, build_download_job_command, log_download_job
 from .lists import lists_txt_path, ensure_list_txt, list_file_is_empty
 from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal, GlobalFlagsModal
 from .search import search
@@ -255,14 +255,17 @@ class GdlTui(App):
         if notify_message:
             self.notify(notify_message)
         spawn_new_console(
-            build_command(
-                dest_folder=dest_folder,
-                input_file=input_file,
-                path_key=path_key,
-                archive=archive,
-                lists_dir=lists_dir,
-                global_flags=global_flags,
-                extra_flags=extra_flags,
+            build_download_job_command(
+                build_command(
+                    dest_folder=dest_folder,
+                    input_file=input_file,
+                    path_key=path_key,
+                    archive=archive,
+                    lists_dir=lists_dir,
+                    global_flags=global_flags,
+                    extra_flags=extra_flags,
+                ),
+                work_dir=os.getcwd(),
             )
         )
 
