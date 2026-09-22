@@ -16,7 +16,7 @@ if __name__ == "__main__":
     missing = check_dependencies()
     if missing:
         choice = ""
-        while choice != "y" or "n":
+        while choice not in ("y", "n"):
             choice = input("Would you like to install the missing dependencies? (Y/n) ").lower()
             if choice == "y":
                 subprocess.run(
