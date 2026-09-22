@@ -83,7 +83,7 @@ def _download_all_jobs(subs: dict[str, list]) -> list[tuple[str, list[str]]]:
 def _pause() -> None:
     try:
         input("Press Enter to close...")
-    except EOFError:
+    except (EOFError, KeyboardInterrupt):
         pass
 
 
@@ -98,16 +98,25 @@ def run_download_all(jobs: list[tuple[str, list[str]]], work_dir: str) -> None:
 
     print(f"Download All: {len(jobs)} subscription(s)")
     print()
-    for index, (name, command) in enumerate(jobs, start=1):
-        print(f"[{index}/{len(jobs)}] {name}")
-        try:
-            log_download_job(name)
-        except OSError as e:
-            print(f"Could not write log header: {e}")
-        if subprocess.run(command).returncode != 0:
-            print("Job failed, continuing...")
-        print()
-    print(f"Download All finished ({len(jobs)} subscription(s)).")
+    try:
+        for index, (name, command) in enumerate(jobs, start=1):
+            print(f"[{index}/{len(jobs)}] {name}")
+            try:
+                log_download_job(name)
+            except OSError as e:
+                print(f"Could not write log header: {e}")
+            try:
+                result = subprocess.run(command)
+            except KeyboardInterrupt:
+                print("\nInterrupted by user.")
+                break
+            if result.returncode != 0:
+                print("Job failed, continuing...")
+            print()
+        else:
+            print(f"Download All finished ({len(jobs)} subscription(s)).")
+    except KeyboardInterrupt:
+        print("\nInterrupted by user.")
     _pause()
 
 
