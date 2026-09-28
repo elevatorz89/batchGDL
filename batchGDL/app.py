@@ -7,7 +7,7 @@ import urllib.request
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, ItemGrid
+from textual.containers import Horizontal, ItemGrid, Vertical
 from textual.widgets import (
     Header, TabbedContent, TabPane, Markdown, Footer,
     Button, Label, Input, OptionList, Static, ListItem, ListView, Switch, Rule
@@ -48,7 +48,7 @@ class GdlTui(App):
         with TabbedContent():
             with TabPane("Single"):
                 yield Markdown("Choose a list to download content from it.")
-                yield OptionList(*single_list_option_labels(), id="list-selection")
+                yield OptionList(*single_list_option_labels(), id="list-selection", classes="list-selection")
                 yield ItemGrid(
                     Button("Download", id="download-button", variant="primary"),
                     Button("Edit List", id="edit-list-button"),
@@ -56,18 +56,18 @@ class GdlTui(App):
                     Button("Add List", id="add-list-button"),
                     Button("Delete List", id="delete-list-button", variant="error"),
                     Button("Refresh", id="refresh-lists-button"),
-                    id="list-actions",
+                    classes="list-actions",
                     min_column_width=14,
                 )
             with TabPane("Subscriptions"):
                 yield Markdown("Choose a subscription to update.")
-                yield OptionList(*subscription_option_labels(_DOWNLOAD_ALL_LABEL), id="subscription-selection")
+                yield OptionList(*subscription_option_labels(_DOWNLOAD_ALL_LABEL), id="subscription-selection", classes="subscription-selection")
                 yield Horizontal(
-                    Static("Append Mode: ", id="append-mode-label"),
+                    Static("Append Mode: ", classes="append-mode-label"),
                     Switch(id="append"),
-                    Static("Ignore archive: ", id="ignore-archive-label"),
+                    Static("Ignore archive: ", classes="ignore-archive-label"),
                     Switch(id="ignore-archive", disabled=True),
-                    id="subs-horizontal",
+                    classes="subs-horizontal",
                 )
                 yield ItemGrid(
                     Button("Download", id="download-subscription-button", variant="primary"),
@@ -77,7 +77,7 @@ class GdlTui(App):
                     Button("Add List", id="add-subscription-button"),
                     Button("Delete List", id="delete-subscription-button", variant="error"),
                     Button("Refresh", id="refresh-subscriptions-button"),
-                    id="subs-actions",
+                    classes="subs-actions",
                     min_column_width=16,
                 )
 
@@ -87,26 +87,33 @@ class GdlTui(App):
                     Input(id="search-input", select_on_focus=True, placeholder="Search term…"))
                 yield Label("", id="search-status")
                 yield ListView(id="search-results")
-            with TabPane("Config"):
-                yield Markdown("Config Menu")
-                yield ItemGrid(
-                    Button("Edit Downloader Config", id="edit-config-button"),
-                    Button("Edit Gallery DL Config", id="edit-gdl-config-button"),
-                    Button("Open Log File", id="open-log-file-button"),
-                    Button("Update Gallery-DL", id="update-gdl-button"),
-                    Button("Check for batchGDL update", id="check-updates-button"),
-                    Button("Refresh Config", id="refresh-config-button"),
-                    Button("Delete Trashed Lists", id="delete-trashed-lists-button", variant="error"),
-                    id="config-actions",
-                    min_column_width=22,
-                )
-                yield Rule()
-                yield Markdown("Select an OAuth cache to reset.")
-                yield OptionList(*oauth_option_labels(), id="oauth-site-list")
-                yield ItemGrid(
-                    Button("Reset OAuth Cache", id="reset-oauth-cache-button", variant="error"),
-                    id="oauth-grid"
-                )
+            with TabPane("Settings"):
+                with TabbedContent():
+                    with TabPane("Config"):
+                        yield ItemGrid(
+                            Button("Edit batchGDL Config", id="edit-config-button"),
+                            Button("Edit Gallery DL Config", id="edit-gdl-config-button"),
+                            Button("Open Log File", id="open-log-file-button"),
+                            Button("Refresh Config", id="refresh-config-button"),
+                            Button("Delete Trashed Lists", id="delete-trashed-lists-button", variant="error"),
+                            classes="config-actions",
+                            min_column_width=22,
+                        )
+                    with TabPane("Update"):
+                        yield ItemGrid(
+                            Button("Update Gallery-DL", id="update-gdl-button"),
+                            Button("Check for batchGDL update", id="check-updates-button"),
+                            Button("Refresh Config", id="refresh-config-button"),
+                            classes="config-actions",
+                            min_column_width=22,
+                        )
+                    with TabPane("OAuth"):
+                        yield Markdown("Select an OAuth cache to reset.")
+                        yield OptionList(*oauth_option_labels(), id="oauth-site-list", classes="oauth-site-list")
+                        yield ItemGrid(
+                            Button("Reset OAuth Cache", id="reset-oauth-cache-button", variant="error"),
+                            classes="oauth-grid",
+                        )
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:

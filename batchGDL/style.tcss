@@ -7,7 +7,7 @@ ItemGrid {
     padding: 0 4;
 }
 
-#subs-horizontal {
+.subs-horizontal {
     height: 3;
     align: left middle;
     content-align: center middle;
@@ -16,38 +16,38 @@ ItemGrid {
     margin-left: 4;
 }
 
-#append-mode-label, #ignore-archive-label {
+.append-mode-label, .ignore-archive-label {
     height: 3;
     content-align: center middle;
     width: auto;
 }
 
-#ignore-archive-label {
+.ignore-archive-label {
     margin-left: 2;
 }
 
 
-#list-selection, #subscription-selection, #oauth-site-list {
+.list-selection, .subscription-selection, .oauth-site-list {
     height: auto;
     max-height: 12;
 }
 
-#list-actions, #config-actions, #subs-actions {
+.list-actions, .config-actions, .subs-actions {
     height: auto;
     margin-top: 1;
     grid-gutter: 1 1;
     width: 1fr;
 }
 
-#config-actions {
+.config-actions {
     margin-bottom: 1;
 }
 
-#list-actions Button, #config-actions Button, #subs-actions Button {
+.list-actions Button, .config-actions Button, .subs-actions Button {
     width: 100%;
 }
 
-#oauth-grid {
+.oauth-grid {
     margin-top: 1
 }
 
