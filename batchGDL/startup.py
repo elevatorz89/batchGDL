@@ -57,7 +57,7 @@ def get_config_version() -> None:
 def clear_download_temp_scripts() -> None:
     temp_dir = tempfile.gettempdir()
     for name in os.listdir(temp_dir):
-        if not (name.startswith("batchGDL_download_") and name.endswith(".py")):
+        if not (name.startswith("batchGDL_") and name.endswith(".py")):
             continue
         path = os.path.join(temp_dir, name)
         try:

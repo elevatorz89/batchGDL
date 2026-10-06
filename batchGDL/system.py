@@ -121,7 +121,3 @@ def _new_console_process(command: list[str], *, cwd: str | None = None) -> subpr
 
 def spawn_new_console(command: list[str], *, cwd: str | None = None) -> None:
     _new_console_process(command, cwd=cwd)
-
-
-def spawn_new_console_series(command: list[str], *, cwd: str | None = None) -> int:
-    return _new_console_process(command, cwd=cwd).wait()

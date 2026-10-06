@@ -80,9 +80,9 @@ def _download_all_jobs(subs: dict[str, list]) -> list[tuple[str, list[str]]]:
     return jobs
 
 
-def pause() -> None:
+def pause(message: str = "Press Enter to close...") -> None:
     try:
-        input("Press Enter to close...")
+        input(message)
     except (EOFError, KeyboardInterrupt):
         pass
 
@@ -163,4 +163,42 @@ def build_download_all_command(subs: dict[str, list], *, work_dir: str | None = 
         prefix="batchGDL_download_all_",
         import_fn="run_download_all",
         call_expr=f"run_download_all({jobs!r}, {work_dir!r})",
+    )
+
+
+def run_oauth_reset(sites: list[str], gdl_config: str) -> None:
+    print(f"OAuth reset: {len(sites)} site(s)")
+    print()
+    try:
+        for index, site in enumerate(sites, start=1):
+            print(f"[{index}/{len(sites)}] {site}")
+            clear = subprocess.run(
+                ["gallery-dl", "--clear-cache", site, "--config", gdl_config],
+            )
+            if clear.returncode != 0:
+                print(f"Cache clear for {site} exited with code {clear.returncode}.")
+            try:
+                result = subprocess.run(
+                    ["gallery-dl", f"oauth:{site}", "--config", gdl_config],
+                )
+            except KeyboardInterrupt:
+                print("\nInterrupted by user.")
+                break
+            if result.returncode != 0:
+                print(f"OAuth for {site} exited with code {result.returncode}.")
+            print()
+            if index < len(sites):
+                pause("Press Enter to continue to the next site...")
+        else:
+            print(f"Finished OAuth reset ({len(sites)} site(s)).")
+    except KeyboardInterrupt:
+        print("\nInterrupted by user.")
+
+
+def build_oauth_reset_command(sites: list[str], *, gdl_config: str | None = None) -> list[str]:
+    gdl_config = gdl_config or config_file_path()
+    return _build_python_launch_command(
+        prefix="batchGDL_oauth_reset_",
+        import_fn="run_oauth_reset",
+        call_expr=f"run_oauth_reset({sites!r}, {gdl_config!r})",
     )

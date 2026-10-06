@@ -1,6 +1,5 @@
 import json
 import os
-import subprocess
 import sys
 import urllib.request
 
@@ -19,11 +18,17 @@ from .config import (
     subscription_option_labels, BATCHGDL_CONFIG_PATH, config_file_path,
 )
 from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APP_VERSION, GITHUB_REPO
-from .downloads import build_command, build_download_all_command, build_download_job_command, log_download_job
+from .downloads import (
+    build_command,
+    build_download_all_command,
+    build_download_job_command,
+    build_oauth_reset_command,
+    log_download_job,
+)
 from .lists import lists_txt_path, ensure_list_txt, list_file_is_empty
 from .modals import ListModal, SubscriptionModal, DeleteEntryModal, ClearTrashModal, GlobalFlagsModal
 from .search import search
-from .system import open_editor, spawn_new_console, spawn_new_console_series
+from .system import open_editor, spawn_new_console
 
 _APPEND_LIST_NAME = "#append"
 _DOWNLOAD_ALL_LABEL = "-Download All-"
@@ -597,28 +602,5 @@ class GdlTui(App):
             self.notify("Nothing configured or selected.", severity="warning")
             return
 
-        gdl_config = config_file_path()
-        total = len(sites)
-        for idx, site in enumerate(sites, start=1):
-            clear = subprocess.run(
-                ["gallery-dl", "--clear-cache", site, "--config", gdl_config],
-                capture_output=True,
-                text=True,
-            )
-            if clear.returncode != 0:
-                err = (clear.stderr or clear.stdout or "").strip()
-                self.notify(
-                    f"Cache clear for {site} returned {clear.returncode}. {err}",
-                    severity="warning",
-                )
-            if total > 1:
-                self.notify(
-                    f"OAuth for {site} ({idx} of {total}) - finish this console before the next opens.",
-                    severity="information",
-                )
-            spawn_new_console_series(["gallery-dl", f"oauth:{site}", "--config", gdl_config])
-
-        if total > 1:
-            self.notify("Reauth finished.", severity="information")
-        else:
-            self.notify("Cache Reset; reauth finished (or window was closed).", severity="information")
+        self.notify("Starting OAuth reset in a new terminal…", severity="information")
+        spawn_new_console(build_oauth_reset_command(sites, gdl_config=config_file_path()))
