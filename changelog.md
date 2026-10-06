@@ -18,10 +18,10 @@
 ### Fixes:
 - Quotation marks (") will be replaced by apostrophes (') when saving global or list-specific flags.
 - The Download All option in the subscription tab now works properly on Linux and MacOS.
-- The search tab can now search lists in both download tabs, like originally intended.
-- Download jobs no longer close the terminal instantly. They will now prompt for user input before closing.
-- Windows batch file now falls back to cmd if Windows Terminal isn't installed.
-- Append mode changed to strip `--filter` from subscription global flags. It functionally works the same as it did in 0.2. You can override this by re-adding it into job-specific flags, if you wish.
+- Search now works for single lists.
+- Download jobs no longer instantly close the terminal upon completion.
+- run_windows.bat now falls back to using cmd if Windows Terminal isn't installed.
+- Append mode changed to strip `--filter` from subscription global flags. It functionally works the same as it did in 0.2. You can override this by re-adding it into the job-specific flags, if you wish.
 
 ## 0.2 - 2026/08/07
 
