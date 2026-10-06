@@ -13,10 +13,17 @@ A simple TUI for managing gallery-dl subscriptions with a simple interface, writ
 # Installation
 ## Prerequisites
 - Python 3.10+
+- pip
 - gallery-dl
 - textual
 - rapidfuzz
 
+If you don't have pip installed, you can run the following command to install it manually:
+```
+python -m ensurepip --upgrade
+```
+
+The application will automatically install the below packages, but you can install them yourself by running:
 ```
 python -m pip install rapidfuzz textual gallery-dl
 ```
