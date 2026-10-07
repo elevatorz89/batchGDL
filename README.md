@@ -64,3 +64,5 @@ If a gallery-dl update fixes an issue, you can update it from the Config tab.
 - I can't download things from a particular site.
   - This is most likely an issue with gallery-dl. Try updating it from the Config tab, then file an issue on their [GitHub](https://github.com/mikf/gallery-dl) or [Codeberg](https://codeberg.org/mikf/gallery-dl) page if the issue persists.
   - Sometimes, sites may require you to provide cookies, an API key, or for you to log in using OAuth.
+- How do I reorder my download jobs?
+  - Your download jobs are based upon their ordering in the config file. Reorder them manually and refresh the config to see the changes. Reordering jobs from within the TUI may be a future feature if there's enough demand for it.

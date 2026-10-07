@@ -1,4 +1,16 @@
 # Changelog
+
+## 0.2.2 - 2026/10/07
+I bring some small anti-annoyance changes with this version.
+### Fixes:
+
+- The "reset all" option in OAuth settings now requires user input to move onto the next website. This gives you time to read potential OAuth errors.
+
+### Changes:
+- Renamed "Edit Downloader Config" to "Edit batchGDL Config"
+- Renamed Config tab to "Settings"
+- The settings menu has been split into 3 tabs.
+
 ## 0.2.1 - 2026/09/22
 
 ### Breaking Changes:
