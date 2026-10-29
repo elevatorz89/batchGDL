@@ -2,13 +2,18 @@
   "config_file": "gdl-config.json",
   "log_file": "logfile_latest.txt",
   "dl_folder": "downloads/",
-  "setup": "false",
+  "setup": "true",
   "oauth-sites": [
     ""
   ],
   "config_ver": 2,
   "download-jobs": {
-    "single": {},
+    "single": {
+      "test": [
+        "test",
+        "test"
+      ]
+    },
     "subscription": {}
   },
   "global-flags-single": [

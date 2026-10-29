@@ -3,6 +3,26 @@ TabPane {
     border: hidden
 }
 
+Sidebar {
+    width: 32;
+    height: 1fr;
+    border: solid $primary;
+    background: $surface;
+    padding: 0 1;
+    layout: vertical;
+}
+
+Sidebar .sidebar-tree {
+    height: auto;
+    max-height: 1fr;
+    margin-bottom: 1;
+}
+
+Sidebar .sidebar-nav {
+    height: auto;
+    margin-top: 1;
+}
+
 ItemGrid {
     padding: 0 4;
 }
@@ -26,6 +46,12 @@ ItemGrid {
     margin-left: 2;
 }
 
+.refresh-button {
+    height: 1;
+    width: 100%;
+    border: none;
+    background: lightgray
+}
 
 .list-selection, .subscription-selection, .oauth-site-list {
     height: auto;

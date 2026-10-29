@@ -3,13 +3,15 @@ import os
 import sys
 import urllib.request
 
+from mdit_py_plugins import container
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, ItemGrid, Vertical
+from textual.widget import Widget
 from textual.widgets import (
     Header, TabbedContent, TabPane, Markdown, Footer,
-    Button, Label, Input, OptionList, Static, ListItem, ListView, Switch, Rule
+    Button, Label, Input, OptionList, Static, ListItem, ListView, Switch, Rule, Collapsible, Tree,
 )
 
 from .config import (
@@ -42,6 +44,41 @@ _SUBSCRIPTION_SELECTION = "#subscription-selection"
 _OAUTH_SITE_LIST = "#oauth-site-list"
 
 
+class Sidebar(Widget):
+    BORDER_TITLE = "Menu"
+
+    def compose(self) -> ComposeResult:
+        yield Tree("Menu", id="download-tree", classes="sidebar-tree")
+        yield Button("Refresh", id="sidebar-refresh-button", flat=True, classes="refresh-button")
+
+    def on_mount(self) -> None:
+        self.refresh_tree()
+
+    def refresh_tree(self) -> None:
+        tree = self.query_one("#download-tree", Tree)
+        tree.clear()
+        tree.show_root = False
+        tree.root.expand()
+
+        download = tree.root.add("Download", expand=True, allow_expand=False)
+        single_tree = download.add("Single", expand=True)
+        for name in single_list_option_labels():
+            single_tree.add_leaf(name, data=("single", name))
+        subscription_tree = download.add("Subscriptions", expand=True)
+        for name in subscription_option_labels(_DOWNLOAD_ALL_LABEL):
+            subscription_tree.add_leaf(name, data=("subscription", name))
+
+        tree.root.add("Search", data="search", allow_expand=False)
+        tree.root.add("Settings", data="settings", allow_expand=False)
+
+
+"""
+class Controls(Widget):
+    BORDER_TITLE = "Controls"
+
+    def compose(self) -> ComposeResult:
+"""
+
 class GdlTui(App):
 
     CSS_PATH = "style.tcss"
@@ -49,7 +86,6 @@ class GdlTui(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-
         with TabbedContent():
             with TabPane("Single"):
                 yield Markdown("Choose a list to download content from it.")
@@ -119,6 +155,9 @@ class GdlTui(App):
                             Button("Reset OAuth Cache", id="reset-oauth-cache-button", variant="error"),
                             classes="oauth-grid",
                         )
+            with TabPane("SidebarTest"):
+                yield Sidebar()
+
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:
@@ -230,6 +269,8 @@ class GdlTui(App):
         self._refresh_option_list(_LIST_SELECTION, single_list_option_labels())
         self._refresh_option_list(_SUBSCRIPTION_SELECTION, subscription_option_labels(_DOWNLOAD_ALL_LABEL))
         self._refresh_option_list(_OAUTH_SITE_LIST, oauth_option_labels())
+        for sidebar in self.query(Sidebar):
+            sidebar.refresh_tree()
 
     def refresh_app(self, source_button: Button | None = None) -> None:
         if not os.path.isfile(BATCHGDL_CONFIG_PATH):
@@ -528,6 +569,7 @@ class GdlTui(App):
 
     ############################ Config ############################
 
+    @on(Button.Pressed, "#sidebar-refresh-button")
     @on(Button.Pressed, "#refresh-lists-button")
     @on(Button.Pressed, "#refresh-subscriptions-button")
     @on(Button.Pressed, "#refresh-config-button")
