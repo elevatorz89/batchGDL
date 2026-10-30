@@ -10,7 +10,7 @@ from textual.binding import Binding
 from textual.containers import Horizontal, ItemGrid, Vertical
 from textual.widget import Widget
 from textual.widgets import (
-    Header, TabbedContent, TabPane, Markdown, Footer,
+    Header, TabbedContent, TabPane, Markdown, Footer, ContentSwitcher,
     Button, Label, Input, OptionList, Static, ListItem, ListView, Switch, Rule, Collapsible, Tree,
 )
 
@@ -72,12 +72,87 @@ class Sidebar(Widget):
         tree.root.add("Settings", data="settings", allow_expand=False)
 
 
-"""
 class Controls(Widget):
     BORDER_TITLE = "Controls"
 
     def compose(self) -> ComposeResult:
-"""
+        with ContentSwitcher(initial="content-download", id="controls-switcher"):
+            with Vertical(id="content-download"):
+                with TabbedContent():
+                    with TabPane("Downloader"):
+                        yield Markdown("Choose a list or subscription to download.")
+                        yield ItemGrid(
+                            Button("Download", variant="primary"),
+                            classes="list-actions",
+                            min_column_width=14,
+                        )
+                    with TabPane("Edit"):
+                        yield Markdown("Edit the selected list or manage lists.")
+                        yield ItemGrid(
+                            Button("Edit List"),
+                            Button("Edit Global Flags"),
+                            Button("Add List"),
+                            Button("Delete List", variant="error"),
+                            Button("Refresh"),
+                            classes="list-actions",
+                            min_column_width=14,
+                        )
+                    with TabPane("Append"):
+                        yield Markdown("Append mode applies to subscriptions.")
+                        yield Horizontal(
+                            Static("Append Mode: ", classes="append-mode-label"),
+                            Switch(),
+                            Static("Ignore archive: ", classes="ignore-archive-label"),
+                            Switch(disabled=True),
+                            classes="subs-horizontal",
+                        )
+                        yield ItemGrid(
+                            Button("Edit Append List"),
+                            classes="subs-actions",
+                            min_column_width=16,
+                        )
+            with Vertical(id="content-search"):
+                yield Markdown("Search through your list files. (ENTER key to search)")
+                yield Horizontal(Input(select_on_focus=True, placeholder="Search term…"))
+                yield Label("")
+                yield ListView()
+            with Vertical(id="content-settings"):
+                with TabbedContent():
+                    with TabPane("Config"):
+                        yield ItemGrid(
+                            Button("Edit batchGDL Config"),
+                            Button("Edit Gallery DL Config"),
+                            Button("Open Log File"),
+                            Button("Refresh Config"),
+                            Button("Delete Trashed Lists", variant="error"),
+                            classes="config-actions",
+                            min_column_width=22,
+                        )
+                    with TabPane("Update"):
+                        yield ItemGrid(
+                            Button("Update Gallery-DL"),
+                            Button("Check for batchGDL update"),
+                            Button("Refresh Config"),
+                            classes="config-actions",
+                            min_column_width=22,
+                        )
+                    with TabPane("OAuth"):
+                        yield Markdown("Select an OAuth cache to reset.")
+                        yield OptionList(*oauth_option_labels(), classes="oauth-site-list")
+                        yield ItemGrid(
+                            Button("Reset OAuth Cache", variant="error"),
+                            classes="oauth-grid",
+                        )
+
+    def show_for_selection(self, data) -> None:
+        switcher = self.query_one("#controls-switcher", ContentSwitcher)
+        if data == "search":
+            switcher.current = "content-search"
+        elif data == "settings":
+            switcher.current = "content-settings"
+        else:
+            switcher.current = "content-download"
+
 
 class GdlTui(App):
 
@@ -88,7 +163,9 @@ class GdlTui(App):
         yield Header()
         with TabbedContent():
             with TabPane("SidebarTest"):
-                yield Sidebar()
+                with Horizontal(classes="sidebar-layout"):
+                    yield Sidebar()
+                    yield Controls()
             with TabPane("Single"):
                 yield Markdown("Choose a list to download content from it.")
                 yield OptionList(*single_list_option_labels(), id="list-selection", classes="list-selection")
@@ -163,6 +240,10 @@ class GdlTui(App):
     def on_mount(self) -> None:
         self.title = f"batchGDL v{APP_VERSION}"
         self._sync_ignore_archive_switch()
+
+    @on(Tree.NodeSelected, "#download-tree")
+    def on_download_tree_selected(self, event: Tree.NodeSelected) -> None:
+        self.query_one(Controls).show_for_selection(event.node.data)
 
     def _sync_ignore_archive_switch(self) -> None:
         append_on = self.query_one("#append", Switch).value

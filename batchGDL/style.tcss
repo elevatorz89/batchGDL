@@ -3,6 +3,11 @@ TabPane {
     border: hidden
 }
 
+.sidebar-layout {
+    height: 1fr;
+    width: 1fr;
+}
+
 Sidebar {
     width: 32;
     height: 1fr;
@@ -12,14 +17,32 @@ Sidebar {
 }
 
 Sidebar .sidebar-tree {
-    height: auto;
-    max-height: 1fr;
+    height: 1fr;
     margin-bottom: 1;
 }
 
 Sidebar .sidebar-nav {
     height: auto;
     margin-top: 1;
+}
+
+Controls {
+    width: 1fr;
+    height: 1fr;
+    border: solid $primary;
+    padding: 0 1;
+}
+
+Controls ContentSwitcher {
+    height: 1fr;
+    width: 1fr;
+}
+
+Controls #content-download,
+Controls #content-search,
+Controls #content-settings {
+    height: 1fr;
+    width: 1fr;
 }
 
 ItemGrid {
