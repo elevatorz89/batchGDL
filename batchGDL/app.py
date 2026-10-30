@@ -87,6 +87,8 @@ class GdlTui(App):
     def compose(self) -> ComposeResult:
         yield Header()
         with TabbedContent():
+            with TabPane("SidebarTest"):
+                yield Sidebar()
             with TabPane("Single"):
                 yield Markdown("Choose a list to download content from it.")
                 yield OptionList(*single_list_option_labels(), id="list-selection", classes="list-selection")
@@ -155,8 +157,6 @@ class GdlTui(App):
                             Button("Reset OAuth Cache", id="reset-oauth-cache-button", variant="error"),
                             classes="oauth-grid",
                         )
-            with TabPane("SidebarTest"):
-                yield Sidebar()
 
         yield Footer(show_command_palette=False)
 
