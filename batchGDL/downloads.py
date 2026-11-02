@@ -148,7 +148,7 @@ def run_download_all(jobs: list[tuple[str, list[str]]], work_dir: str) -> None:
                 print("\nInterrupted by user.")
                 break
             if result.returncode != 0:
-                print("Job failed, continuing...")
+                print("Job completed with errors. Continuing.")
             print()
         else:
             print(f"Finished downloading ({len(jobs)} subscription(s)).")
