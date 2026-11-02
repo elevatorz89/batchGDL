@@ -117,7 +117,7 @@ def run_gallery_dl(command: list[str], work_dir: str) -> None:
     _ensure_work_dir(work_dir)
     result = subprocess.run(command)
     if result.returncode != 0:
-        print(f"Download exited with code {result.returncode}.")
+        print(f"Download exited with errors. (Code {result.returncode}.)")
 
 
 def build_download_job_command(command: list[str], *, work_dir: str | None = None) -> list[str]:
