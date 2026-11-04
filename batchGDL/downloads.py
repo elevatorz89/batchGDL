@@ -95,13 +95,21 @@ def _ensure_work_dir(work_dir: str) -> None:
         raise SystemExit(1)
 
 
-def _build_python_launch_command(*, prefix: str, import_fn: str, call_expr: str) -> list[str]:
+def _build_python_launch_command(
+    *,
+    prefix: str,
+    import_fn: str,
+    call_expr: str,
+    title: str,
+) -> list[str]:
     package_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     fd, path = tempfile.mkstemp(prefix=prefix, suffix=".py")
     with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(
             "import sys\n"
             f"sys.path.insert(0, {package_root!r})\n"
+            "from batchGDL.system import set_console_title\n"
+            f"set_console_title({title!r})\n"
             f"from batchGDL.downloads import pause, {import_fn}\n"
             "try:\n"
             f"    {call_expr}\n"
@@ -120,12 +128,18 @@ def run_gallery_dl(command: list[str], work_dir: str) -> None:
         print(f"Download exited with errors. (Code {result.returncode}.)")
 
 
-def build_download_job_command(command: list[str], *, work_dir: str | None = None) -> list[str]:
+def build_download_job_command(
+    command: list[str],
+    *,
+    work_dir: str | None = None,
+    title: str | None = None,
+) -> list[str]:
     work_dir = os.path.abspath(work_dir or os.getcwd())
     return _build_python_launch_command(
         prefix="batchGDL_download_job_",
         import_fn="run_gallery_dl",
         call_expr=f"run_gallery_dl({command!r}, {work_dir!r})",
+        title=title or "batchGDL — Download",
     )
 
 
@@ -163,6 +177,7 @@ def build_download_all_command(subs: dict[str, list], *, work_dir: str | None = 
         prefix="batchGDL_download_all_",
         import_fn="run_download_all",
         call_expr=f"run_download_all({jobs!r}, {work_dir!r})",
+        title="batchGDL — Download All Subscriptions",
     )
 
 
@@ -201,4 +216,5 @@ def build_oauth_reset_command(sites: list[str], *, gdl_config: str | None = None
         prefix="batchGDL_oauth_reset_",
         import_fn="run_oauth_reset",
         call_expr=f"run_oauth_reset({sites!r}, {gdl_config!r})",
+        title="batchGDL — OAuth Reset",
     )

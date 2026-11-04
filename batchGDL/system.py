@@ -119,5 +119,24 @@ def _new_console_process(command: list[str], *, cwd: str | None = None) -> subpr
     )
 
 
+def set_console_title(title: str) -> None:
+    safe = "".join(c for c in title if c.isprintable())
+    if not safe:
+        return
+    if os.name == "nt":
+        # renames console window on windows
+        try:
+            import ctypes
+
+            getattr(ctypes.WinDLL("kernel32", use_last_error=True), "SetConsoleTitleW")(safe)
+        except (AttributeError, OSError, ValueError, TypeError):
+            pass
+        return
+    if sys.stdout.isatty():
+        # uses OSC 0 to rename macOS Terminal, gnome-terminal, xterm, etc.
+        sys.stdout.write(f"\033]0;{safe}\007")
+        sys.stdout.flush()
+
+
 def spawn_new_console(command: list[str], *, cwd: str | None = None) -> None:
     _new_console_process(command, cwd=cwd)

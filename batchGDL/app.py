@@ -410,6 +410,7 @@ class GdlTui(App):
                     extra_flags=extra_flags,
                 ),
                 work_dir=os.getcwd(),
+                title=f"batchGDL — {job_name}" if job_name else None,
             )
         )
 
