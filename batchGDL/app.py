@@ -60,16 +60,18 @@ class Sidebar(Widget):
         tree.show_root = False
         tree.root.expand()
 
-        download = tree.root.add("Download", expand=True, allow_expand=False)
-        single_tree = download.add("Single", expand=True)
+        download = tree.root.add("Download", data="none", expand=True, allow_expand=False)
+        single_tree = download.add("Single", data="none", expand=True)
         for name in single_list_option_labels():
             single_tree.add_leaf(name, data=("single", name))
-        subscription_tree = download.add("Subscriptions", expand=True)
+        subscription_tree = download.add("Subscriptions", data="none", expand=True)
         for name in subscription_option_labels(_DOWNLOAD_ALL_LABEL):
             subscription_tree.add_leaf(name, data=("subscription", name))
 
         tree.root.add("Search", data="search", allow_expand=False)
         tree.root.add("Settings", data="settings", allow_expand=False)
+        tree.root.add("------", data="none", allow_expand=False)
+        tree.root.add("Add New List", data="add_list", allow_expand=False)
 
 
 class Controls(Widget):
@@ -144,15 +146,23 @@ class Controls(Widget):
                             Button("Reset OAuth Cache", variant="error"),
                             classes="oauth-grid",
                         )
+            with Vertical(id="none"):
+                yield Markdown("Choose a list or option from the sidebar.")
 
     def show_for_selection(self, data) -> None:
         switcher = self.query_one("#controls-switcher", ContentSwitcher)
-        if data == "search":
-            switcher.current = "content-search"
-        elif data == "settings":
-            switcher.current = "content-settings"
-        else:
-            switcher.current = "content-download"
+
+        match data:
+            case "search":
+                switcher.current = "content-search"
+            case "settings":
+                switcher.current = "content-settings"
+            case ("single", _) | ("subscription", _):
+                switcher.current = "content-download"
+            case "add_list" | "none" | None:
+                switcher.current = "none"
+            case _:
+                switcher.current = "none"
 
 
 class GdlTui(App):
