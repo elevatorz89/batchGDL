@@ -38,7 +38,25 @@ Controls ContentSwitcher {
     width: 1fr;
 }
 
-Controls #content-download,
+Controls #content-download {
+    height: 1fr;
+    width: 1fr;
+    layout: grid;
+    grid-size: 2 1;
+    grid-gutter: 1 1;
+}
+
+Controls #download-pane,
+Controls #edit-pane {
+    height: 1fr;
+    width: 1fr;
+}
+
+Controls #edit-pane {
+    border: solid $primary;
+    padding: 0 1;
+}
+
 Controls #content-search,
 Controls #content-settings {
     height: 1fr;

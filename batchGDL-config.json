@@ -14,7 +14,13 @@
         "test"
       ]
     },
-    "subscription": {}
+    "subscription": {
+      "stest": [
+        "stest",
+        "stest",
+        "stest"
+      ]
+    }
   },
   "global-flags-single": [
     "--cookies-from-browser firefox"

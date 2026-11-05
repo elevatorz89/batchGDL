@@ -77,40 +77,41 @@ class Controls(Widget):
 
     def compose(self) -> ComposeResult:
         with ContentSwitcher(initial="content-download", id="controls-switcher"):
-            with Vertical(id="content-download"):
-                with TabbedContent():
-                    with TabPane("Downloader"):
-                        yield Markdown("Choose a list or subscription to download.")
-                        yield ItemGrid(
-                            Button("Download", variant="primary"),
-                            classes="list-actions",
-                            min_column_width=14,
-                        )
-                    with TabPane("Edit"):
-                        yield Markdown("Edit the selected list or manage lists.")
-                        yield ItemGrid(
-                            Button("Edit List"),
-                            Button("Edit Global Flags"),
-                            Button("Add List"),
-                            Button("Delete List", variant="error"),
-                            Button("Refresh"),
-                            classes="list-actions",
-                            min_column_width=14,
-                        )
-                    with TabPane("Append"):
-                        yield Markdown("Append mode applies to subscriptions.")
-                        yield Horizontal(
-                            Static("Append Mode: ", classes="append-mode-label"),
-                            Switch(),
-                            Static("Ignore archive: ", classes="ignore-archive-label"),
-                            Switch(disabled=True),
-                            classes="subs-horizontal",
-                        )
-                        yield ItemGrid(
-                            Button("Edit Append List"),
-                            classes="subs-actions",
-                            min_column_width=16,
-                        )
+            with Horizontal(id="content-download"):
+                with Vertical(id="download-pane"):
+                    with TabbedContent():
+                        with TabPane("Downloader"):
+                            yield Markdown("Choose a list or subscription to download.")
+                            yield ItemGrid(
+                                Button("Download", variant="primary"),
+                                classes="list-actions",
+                                min_column_width=14,
+                            )
+                        with TabPane("Append"):
+                            yield Markdown("Append mode applies to subscriptions.")
+                            yield Horizontal(
+                                Static("Append Mode: ", classes="append-mode-label"),
+                                Switch(),
+                                Static("Ignore archive: ", classes="ignore-archive-label"),
+                                Switch(disabled=True),
+                                classes="subs-horizontal",
+                            )
+                            yield ItemGrid(
+                                Button("Edit Append List"),
+                                classes="subs-actions",
+                                min_column_width=16,
+                            )
+                with Vertical(id="edit-pane") as edit_pane:
+                    edit_pane.border_title = "Edit"
+                    yield Markdown("Edit the selected list or manage lists.")
+                    yield ItemGrid(
+                        Button("Edit List"),
+                        Button("Edit Global Flags"),
+                        Button("Add List"),
+                        Button("Delete List", variant="error"),
+                        classes="list-actions",
+                        min_column_width=14,
+                    )
             with Vertical(id="content-search"):
                 yield Markdown("Search through your list files. (ENTER key to search)")
                 yield Horizontal(Input(select_on_focus=True, placeholder="Search term…"))
