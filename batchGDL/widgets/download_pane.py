@@ -64,9 +64,9 @@ class DownloadPane(Vertical):
             append.value = False
         self._sync_ignore_archive_switch()
 
-        # locks append tab for download all screen
+        # locks append tab for single lists and the download all screen
         tabs = self.query_one("#download-tabs", TabbedContent)
-        if kind == "subscription" and name == DOWNLOAD_ALL_LABEL:
+        if kind == "single" or (kind == "subscription" and name == DOWNLOAD_ALL_LABEL):
             tabs.active = "download-main-tab"
             tabs.disable_tab("download-append-tab")
         else:

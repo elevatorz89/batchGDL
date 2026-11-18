@@ -16,7 +16,7 @@ class Controls(Widget):
     BORDER_TITLE = "Controls"
 
     def compose(self) -> ComposeResult:
-        with ContentSwitcher(initial="content-download", id="controls-switcher"):
+        with ContentSwitcher(initial="none", id="controls-switcher"):
             with Horizontal(id="content-download"):
                 yield DownloadPane()
                 yield EditPane()
