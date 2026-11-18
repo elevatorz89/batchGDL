@@ -62,12 +62,35 @@ Controls EditPane .edit-pane-scroll {
     scrollbar-gutter: stable;
 }
 
+/* Tab bar stays fixed; each tab pane scrolls its own content. */
 Controls EditPane #edit-tabs {
+    height: 1fr;
+}
+
+Controls EditPane TabPane {
+    height: 1fr;
+    overflow: hidden;
+}
+
+/* Let the form size itself so the tab's scroll area can scroll it. */
+Controls EditPane #edit-list-switcher,
+Controls EditPane #edit-list-switcher > Vertical {
     height: auto;
 }
 
 Controls EditPane Input {
     margin-bottom: 1;
+}
+
+/* Tighten the space between the last field and the action buttons.
+   The error label only takes a row when it has a message. */
+Controls EditPane .list-modal-error {
+    height: auto;
+    margin-top: 0;
+}
+
+Controls EditPane .list-modal-actions {
+    margin-top: 0;
 }
 
 Controls #content-search,

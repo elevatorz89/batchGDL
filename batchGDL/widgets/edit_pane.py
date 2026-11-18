@@ -50,9 +50,9 @@ class EditPane(Widget):
         self._name: str | None = None
 
     def compose(self) -> ComposeResult:
-        with VerticalScroll(classes="edit-pane-scroll"):
-            with TabbedContent(id="edit-tabs"):
-                with TabPane("Edit List", id="edit-list-tab"):
+        with TabbedContent(id="edit-tabs"):
+            with TabPane("Edit List", id="edit-list-tab"):
+                with VerticalScroll(classes="edit-pane-scroll"):
                     with ContentSwitcher(initial="edit-list-empty", id="edit-list-switcher"):
                         with Vertical(id="edit-list-empty"):
                             yield Markdown("Select a list or subscription to edit.")
@@ -72,7 +72,13 @@ class EditPane(Widget):
                         classes="list-modal-actions",
                         min_column_width=14,
                     )
-                with TabPane("Edit Global Flags", id="edit-flags-tab"):
+                    yield ItemGrid(
+                        Button("Delete List", id="edit-delete-list", variant="error"),
+                        classes="list-actions",
+                        min_column_width=14,
+                    )
+            with TabPane("Edit Global Flags", id="edit-flags-tab"):
+                with VerticalScroll(classes="edit-pane-scroll"):
                     yield Label("", id="edit-flags-title", classes="list-modal-title")
                     yield Label("Global flags")
                     yield Input(
@@ -85,11 +91,6 @@ class EditPane(Widget):
                         classes="list-modal-actions",
                         min_column_width=14,
                     )
-            yield ItemGrid(
-                Button("Delete List", id="edit-delete-list", variant="error"),
-                classes="list-actions",
-                min_column_width=14,
-            )
 
     def on_mount(self) -> None:
         self.clear_selection()
@@ -114,7 +115,7 @@ class EditPane(Widget):
         self._kind = None
         self._name = None
         self.query_one("#edit-list-switcher", ContentSwitcher).current = "edit-list-empty"
-        self.query_one("#edit-list-error", Label).update("")
+        self._set_list_error("")
         self.query_one("#edit-flags-title", Label).update("Edit Global Flags")
         self.query_one("#edit-global-flags", Input).value = ""
         self._set_edit_enabled(False)
@@ -124,14 +125,14 @@ class EditPane(Widget):
             self._kind = "subscription"
             self._name = None
             self.query_one("#edit-list-switcher", ContentSwitcher).current = "edit-list-empty"
-            self.query_one("#edit-list-error", Label).update("")
+            self._set_list_error("")
             self._load_global_flags()
             self._set_edit_enabled(flags_only=True)
             return
 
         self._kind = kind
         self._name = name
-        self.query_one("#edit-list-error", Label).update("")
+        self._set_list_error("")
         if kind == "single":
             self.query_one("#edit-list-switcher", ContentSwitcher).current = "edit-list-single"
             self._set_field_values(LIST_FIELDS, _EDIT_SINGLE_PREFIX, list_initial_values(name))
@@ -167,6 +168,11 @@ class EditPane(Widget):
         else:
             tabs.enable_tab("edit-list-tab")
 
+    def _set_list_error(self, message: str) -> None:
+        # Hidden while empty so it doesn't add a blank row above the buttons.
+        label = self.query_one("#edit-list-error", Label)
+        label.update(message)
+        label.display = bool(message)
     def _set_field_values(
         self,
         fields: tuple[tuple[str, str, str], ...],
@@ -205,7 +211,6 @@ class EditPane(Widget):
             self.app.notify("Select a list or subscription to edit.", severity="warning")
             return None
 
-        error = self.query_one("#edit-list-error", Label)
         if self._kind == "single":
             fields, prefix, lists_dir, section = LIST_FIELDS, _EDIT_SINGLE_PREFIX, SINGLE_LISTS_DIR, "single"
             values = self._field_values(fields, prefix)
@@ -219,23 +224,23 @@ class EditPane(Widget):
 
         display_name = values.get("display-name", "")
         if not display_name:
-            error.update("Display name is required.")
+            self._set_list_error("Display name is required.")
             return None
 
         section_data = job_section(section)
         if display_name in section_data and display_name != self._name:
             kind = "subscription" if section == "subscription" else "list"
-            error.update(f"A {kind} with that display name already exists.")
+            self._set_list_error(f"A {kind} with that display name already exists.")
             return None
 
         if entry is None:
             if section == "subscription":
-                error.update("Archive filename is required.")
+                self._set_list_error("Archive filename is required.")
             else:
-                error.update("Could not build list entry.")
+                self._set_list_error("Could not build list entry.")
             return None
 
-        error.update("")
+        self._set_list_error("")
         saved_name = save_job_entry(
             section=section,
             lists_dir=lists_dir,
@@ -249,7 +254,7 @@ class EditPane(Widget):
     def reset_list(self) -> None:
         if not self._kind or not self._name:
             return
-        self.query_one("#edit-list-error", Label).update("")
+        self._set_list_error("")
         if self._kind == "single":
             self._set_field_values(LIST_FIELDS, _EDIT_SINGLE_PREFIX, list_initial_values(self._name))
         else:
