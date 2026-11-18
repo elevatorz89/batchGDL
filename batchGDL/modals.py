@@ -14,6 +14,143 @@ from .system import open_editor, move_to_trash, clear_list_trash
 
 _MODAL_SCROLL = "list-modal list-modal-scroll"
 
+LIST_FIELDS: tuple[tuple[str, str, str], ...] = (
+    ("Display name", "display-name", "Display name..."),
+    ("List filename", "list-file", "Defaults to display name"),
+    ("Destination folder", "dest-folder", "Defaults to list filename"),
+    ("Extra flags", "extra-flags", 'Optional, e.g. --write-metadata --filter "score > 10"'),
+)
+
+SUBSCRIPTION_FIELDS: tuple[tuple[str, str, str], ...] = (
+    ("Display name", "display-name", "My Subscription"),
+    ("Category folder", "category", "Defaults to display name"),
+    ("List filename", "list-file", "Defaults to display name"),
+    ("Archive filename", "archive-file", "Required"),
+    ("Extra flags", "extra-flags", 'Optional, e.g. --write-metadata --filter "score > 10"'),
+)
+
+
+def list_initial_values(original_name: str | None) -> dict[str, str]:
+    if not original_name:
+        return {}
+    entry = job_section("single").get(original_name)
+    if not entry or len(entry) < 2:
+        return {"display-name": original_name}
+    return {
+        "display-name": original_name,
+        "list-file": entry[0],
+        "dest-folder": entry[1],
+        "extra-flags": entry_extra_flags(entry, 2),
+    }
+
+
+def subscription_initial_values(original_name: str | None) -> dict[str, str]:
+    if not original_name:
+        return {}
+    entry = job_section("subscription").get(original_name)
+    if not entry or len(entry) < 2:
+        return {"display-name": original_name}
+    return {
+        "display-name": original_name,
+        "category": entry[0],
+        "list-file": entry[1],
+        "archive-file": entry[2] if len(entry) > 2 else "",
+        "extra-flags": entry_extra_flags(entry, 3),
+    }
+
+
+def build_list_entry(values: dict[str, str]) -> list[str]:
+    display_name = values["display-name"]
+    list_file = slug_list_name(values.get("list-file", "") or display_name)
+    dest_folder = slug_list_name(values.get("dest-folder", "") or list_file)
+    return with_optional_flags([list_file, dest_folder], values.get("extra-flags", ""))
+
+
+def build_subscription_entry(values: dict[str, str]) -> list[str] | None:
+    display_name = values["display-name"]
+    slug = slug_list_name(display_name)
+    category = slug_list_name(values.get("category", "") or slug)
+    list_file = slug_list_name(values.get("list-file", "") or slug)
+    archive_file = values.get("archive-file", "")
+    if not archive_file:
+        return None
+    return with_optional_flags(
+        [category, list_file, slug_list_name(archive_file)],
+        values.get("extra-flags", ""),
+    )
+
+
+def list_file_from_values(section: str, values: dict[str, str]) -> str | None:
+    display_name = values.get("display-name", "")
+    list_file = values.get("list-file", "")
+    if not (display_name or list_file):
+        return None
+    return slug_list_name(list_file or display_name)
+
+
+def list_file_from_entry(section: str, entry: list) -> str | None:
+    index_by_section = {"single": 0, "subscription": 1}
+    index = index_by_section.get(section)
+    if index is None:
+        return None
+    return entry[index] if len(entry) > index else None
+
+
+def save_job_entry(
+    *,
+    section: str,
+    lists_dir: str,
+    original_name: str | None,
+    values: dict[str, str],
+    entry: list[str],
+) -> str:
+    """Persist a job entry and return the saved display name."""
+    display_name = values["display-name"]
+    section_data = job_section(section)
+
+    old_list_file = None
+    if original_name and original_name in section_data:
+        old_list_file = list_file_from_entry(section, section_data[original_name])
+
+    new_list_file = list_file_from_values(section, values)
+    if new_list_file:
+        ensure_or_rename_list_txt(old_list_file, new_list_file, lists_dir)
+
+    if original_name and original_name != display_name:
+        section_data.pop(original_name, None)
+    section_data[display_name] = entry
+    save_config()
+    return display_name
+
+
+def global_flags_value(config_key: str) -> str:
+    flags = config.get(config_key) or []
+    if isinstance(flags, str):
+        return flags
+    return " ".join(str(flag) for flag in flags)
+
+
+def save_global_flags(config_key: str, value: str) -> None:
+    value = value.strip().replace('"', "'")
+    config[config_key] = [value] if value else []
+    save_config()
+
+
+def compose_entry_fields(
+    fields: tuple[tuple[str, str, str], ...],
+    *,
+    values: dict[str, str] | None = None,
+    id_prefix: str = "",
+) -> ComposeResult:
+    values = values or {}
+    for label, input_id, placeholder in fields:
+        yield Label(label)
+        yield Input(
+            value=values.get(input_id, ""),
+            id=f"{id_prefix}{input_id}" if id_prefix else input_id,
+            placeholder=placeholder,
+        )
+
 
 def compose_entry_form(
     title: str,
@@ -23,12 +160,9 @@ def compose_entry_form(
     values: dict[str, str] | None = None,
     show_open_list: bool = False,
 ) -> ComposeResult:
-    values = values or {}
     with VerticalScroll(classes=_MODAL_SCROLL):
         yield Label(title, classes="list-modal-title")
-        for label, input_id, placeholder in fields:
-            yield Label(label)
-            yield Input(value=values.get(input_id, ""), id=input_id, placeholder=placeholder)
+        yield from compose_entry_fields(fields, values=values)
         yield Label("", id="entry-error", classes="list-modal-error")
         with ItemGrid(classes="list-modal-actions", min_column_width=14):
             yield Button(confirm_label, id="entry-confirm", variant="primary")
@@ -54,16 +188,10 @@ class EntryModal(ModalScreen[bool]):
         return {}
 
     def list_file_from_values(self, values: dict[str, str]) -> str | None:
-        display_name = values.get("display-name", "")
-        list_file = values.get("list-file", "")
-        return slug_list_name(list_file or display_name) if display_name or list_file else None
+        return list_file_from_values(self._CONFIG_SECTION, values)
 
     def list_file_from_entry(self, entry: list) -> str | None:
-        index_by_section = {"single": 0, "subscription": 1}
-        index = index_by_section.get(self._CONFIG_SECTION)
-        if index is None:
-            return None
-        return entry[index] if len(entry) > index else None
+        return list_file_from_entry(self._CONFIG_SECTION, entry)
 
     def build_entry(self, values: dict[str, str], error: Label) -> list[str] | None:
         raise NotImplementedError
@@ -125,93 +253,49 @@ class EntryModal(ModalScreen[bool]):
             error.update(f"A {kind} with that display name already exists.")
             return
 
-        old_list_file = None
-        if self.editing and self.original_name in section:
-            old_list_file = self.list_file_from_entry(section[self.original_name])
-
         entry = self.build_entry(values, error)
         if entry is None:
             return
 
-        new_list_file = self.list_file_from_values(values)
-        if new_list_file:
-            ensure_or_rename_list_txt(old_list_file, new_list_file, self._LISTS_DIR)
-
-        if self.editing and self.original_name and self.original_name != display_name:
-            section.pop(self.original_name, None)
-        section[display_name] = entry
-        save_config()
+        save_job_entry(
+            section=self._CONFIG_SECTION,
+            lists_dir=self._LISTS_DIR,
+            original_name=self.original_name,
+            values=values,
+            entry=entry,
+        )
         self.dismiss(True)
 
 
 class ListModal(EntryModal):
-    _FIELDS = (
-        ("Display name", "display-name", "Display name..."),
-        ("List filename", "list-file", "Defaults to display name"),
-        ("Destination folder", "dest-folder", "Defaults to list filename"),
-        ("Extra flags", "extra-flags", 'Optional, e.g. --write-metadata --filter "score > 10"'),
-    )
+    _FIELDS = LIST_FIELDS
     _TITLE_ADD = "Add List"
     _TITLE_EDIT = "Edit List"
     _CONFIG_SECTION = "single"
     _LISTS_DIR = SINGLE_LISTS_DIR
 
     def initial_values(self) -> dict[str, str]:
-        entry = job_section("single").get(self.original_name or "")
-        if not entry or len(entry) < 2:
-            return {"display-name": self.original_name or ""}
-        return {
-            "display-name": self.original_name or "",
-            "list-file": entry[0],
-            "dest-folder": entry[1],
-            "extra-flags": entry_extra_flags(entry, 2),
-        }
+        return list_initial_values(self.original_name)
 
     def build_entry(self, values: dict[str, str], error: Label) -> list[str] | None:
-        display_name = values["display-name"]
-        list_file = slug_list_name(values["list-file"] or display_name)
-        dest_folder = slug_list_name(values["dest-folder"] or list_file)
-        return with_optional_flags([list_file, dest_folder], values.get("extra-flags", ""))
+        return build_list_entry(values)
 
 
 class SubscriptionModal(EntryModal):
-    _FIELDS = (
-        ("Display name", "display-name", "My Subscription"),
-        ("Category folder", "category", "Defaults to display name"),
-        ("List filename", "list-file", "Defaults to display name"),
-        ("Archive filename", "archive-file", "Required"),
-        ("Extra flags", "extra-flags", 'Optional, e.g. --write-metadata --filter "score > 10"'),
-    )
+    _FIELDS = SUBSCRIPTION_FIELDS
     _TITLE_ADD = "Add Subscription"
     _TITLE_EDIT = "Edit Subscription"
     _CONFIG_SECTION = "subscription"
     _LISTS_DIR = SUBSCRIPTION_LISTS_DIR
 
     def initial_values(self) -> dict[str, str]:
-        entry = job_section("subscription").get(self.original_name or "")
-        if not entry or len(entry) < 2:
-            return {"display-name": self.original_name or ""}
-        return {
-            "display-name": self.original_name or "",
-            "category": entry[0],
-            "list-file": entry[1],
-            "archive-file": entry[2] if len(entry) > 2 else "",
-            "extra-flags": entry_extra_flags(entry, 3),
-        }
+        return subscription_initial_values(self.original_name)
 
     def build_entry(self, values: dict[str, str], error: Label) -> list[str] | None:
-        display_name = values["display-name"]
-        slug = slug_list_name(display_name)
-        category = slug_list_name(values["category"] or slug)
-        list_file = slug_list_name(values["list-file"] or slug)
-        archive_file = values["archive-file"]
-        if not archive_file:
+        entry = build_subscription_entry(values)
+        if entry is None:
             error.update("Archive filename is required.")
-            return None
-        return with_optional_flags(
-            [category, list_file, slug_list_name(archive_file)],
-            values.get("extra-flags", ""),
-        )
+        return entry
 
 
 class DeleteEntryModal(ModalScreen[bool]):
@@ -311,10 +395,7 @@ class GlobalFlagsModal(ModalScreen[bool]):
         self.title_text = title
 
     def _flags_value(self) -> str:
-        flags = config.get(self.config_key) or []
-        if isinstance(flags, str):
-            return flags
-        return " ".join(str(flag) for flag in flags)
+        return global_flags_value(self.config_key)
 
     def compose(self) -> ComposeResult:
         with VerticalScroll(classes=_MODAL_SCROLL):
@@ -342,7 +423,5 @@ class GlobalFlagsModal(ModalScreen[bool]):
     @on(Input.Submitted, "#global-flags")
     @on(Button.Pressed, "#global-flags-confirm")
     def on_submit(self, event: object) -> None:
-        value = self.query_one("#global-flags", Input).value.strip().replace('"', "'")
-        config[self.config_key] = [value] if value else []
-        save_config()
+        save_global_flags(self.config_key, self.query_one("#global-flags", Input).value)
         self.dismiss(True)

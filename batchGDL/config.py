@@ -109,6 +109,21 @@ def entry_extra_flags(entry: list, index: int) -> str:
     return value.strip() if isinstance(value, str) else ""
 
 
+def single_list_entry(name: str) -> tuple[str, str, str] | None:
+    entry = job_section("single").get(name)
+    if not entry or len(entry) < 2:
+        return None
+    return entry[0], entry[1], entry_extra_flags(entry, 2)
+
+
+def subscription_entry(name: str) -> tuple[str, str, str | None, str] | None:
+    entry = job_section("subscription").get(name)
+    if not entry or len(entry) < 2:
+        return None
+    archive = entry[2] if len(entry) > 2 else None
+    return entry[0], entry[1], archive, entry_extra_flags(entry, 3)
+
+
 def parse_extra_flags(flags: str | None) -> list[str]:
     if not flags or not str(flags).strip():
         return []

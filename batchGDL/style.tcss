@@ -47,14 +47,27 @@ Controls #content-download {
 }
 
 Controls #download-pane,
-Controls #edit-pane {
+Controls EditPane {
     height: 1fr;
     width: 1fr;
 }
 
-Controls #edit-pane {
+Controls EditPane {
     border: solid $primary;
     padding: 0 1;
+}
+
+Controls EditPane .edit-pane-scroll {
+    height: 1fr;
+    scrollbar-gutter: stable;
+}
+
+Controls EditPane #edit-tabs {
+    height: auto;
+}
+
+Controls EditPane Input {
+    margin-bottom: 1;
 }
 
 Controls #content-search,
