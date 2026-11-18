@@ -159,6 +159,14 @@ class EditPane(Widget):
         for button_id in ("#edit-flags-save", "#edit-flags-reset"):
             self.query_one(button_id, Button).disabled = not flags_enabled
 
+        # locks list tab for download all screen
+        tabs = self.query_one("#edit-tabs", TabbedContent)
+        if flags_only:
+            tabs.active = "edit-flags-tab"
+            tabs.disable_tab("edit-list-tab")
+        else:
+            tabs.enable_tab("edit-list-tab")
+
     def _set_field_values(
         self,
         fields: tuple[tuple[str, str, str], ...],

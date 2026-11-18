@@ -26,8 +26,8 @@ class DownloadPane(Vertical):
         self._name: str | None = None
 
     def compose(self) -> ComposeResult:
-        with TabbedContent():
-            with TabPane("Downloader"):
+        with TabbedContent(id="download-tabs"):
+            with TabPane("Downloader", id="download-main-tab"):
                 yield Markdown("Choose a list or subscription to download.")
                 yield Label("", id="download-selection")
                 yield ItemGrid(
@@ -35,7 +35,7 @@ class DownloadPane(Vertical):
                     classes="list-actions",
                     min_column_width=14,
                 )
-            with TabPane("Append"):
+            with TabPane("Append", id="download-append-tab"):
                 yield Markdown("Append mode applies to subscriptions.")
                 yield Horizontal(
                     Static("Append Mode: ", classes="append-mode-label"),
@@ -63,6 +63,14 @@ class DownloadPane(Vertical):
         if append.disabled:
             append.value = False
         self._sync_ignore_archive_switch()
+
+        # locks append tab for download all screen
+        tabs = self.query_one("#download-tabs", TabbedContent)
+        if kind == "subscription" and name == DOWNLOAD_ALL_LABEL:
+            tabs.active = "download-main-tab"
+            tabs.disable_tab("download-append-tab")
+        else:
+            tabs.enable_tab("download-append-tab")
 
     def _sync_ignore_archive_switch(self) -> None:
         append_on = self.query_one("#append", Switch).value
