@@ -60,8 +60,8 @@ class Controls(Widget):
 
     @on(EditPane.Saved)
     def on_edit_pane_saved(self, event: EditPane.Saved) -> None:
-        # The entry may have been renamed; keep the download target in sync.
-        self.query_one(DownloadPane).set_selection(event.kind, event.name)
+        # If the entry is renamed, the selected target on the sidebar stays selected.
+        self.query_one(DownloadPane).set_selection(event.kind, event.name, reset_options=False)
         self.post_message(ConfigChanged())
 
     @on(EditPane.Deleted)

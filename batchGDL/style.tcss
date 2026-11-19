@@ -8,7 +8,7 @@ TabPane {
     width: 1fr;
 }
 
-Sidebar {
+SidebarTree {
     width: 32;
     height: 1fr;
     border: solid $primary;
@@ -16,12 +16,12 @@ Sidebar {
     layout: vertical;
 }
 
-Sidebar .sidebar-tree {
+SidebarTree .sidebar-tree {
     height: 1fr;
     margin-bottom: 1;
 }
 
-Sidebar .sidebar-nav {
+SidebarTree .sidebar-nav {
     height: auto;
     margin-top: 1;
 }

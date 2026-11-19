@@ -9,13 +9,11 @@ from ..config import (
     flags_without_option, global_flags_string, job_section,
     single_list_entry, subscription_entry,
 )
-from ..constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
+from ..constants import APPEND_LISTS_DIR, SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
 from ..downloads import build_command, build_download_all_command, build_download_job_command, log_download_job
-from ..lists import ensure_list_txt, list_file_is_empty, lists_txt_path
+from ..lists import append_list_name, ensure_list_txt, list_file_is_empty, lists_txt_path
 from ..system import spawn_new_console
 from .common import DOWNLOAD_ALL_LABEL, open_editor_path
-
-_APPEND_LIST_NAME = "#append"
 
 
 class DownloadPane(Vertical):
@@ -28,7 +26,7 @@ class DownloadPane(Vertical):
     def compose(self) -> ComposeResult:
         with TabbedContent(id="download-tabs"):
             with TabPane("Downloader", id="download-main-tab"):
-                yield Markdown("Choose a list or subscription to download.")
+                yield Markdown("Selected list:")
                 yield Label("", id="download-selection")
                 yield ItemGrid(
                     Button("Download", id="download-button", variant="primary", disabled=True),
@@ -36,12 +34,13 @@ class DownloadPane(Vertical):
                     min_column_width=14,
                 )
             with TabPane("Append", id="download-append-tab"):
-                yield Markdown("Append mode applies to subscriptions.")
+                yield Markdown(
+                    "Downloads from this tab will only include links in the below append list and ignore date filters. "
+                    "If you wish to download absolutely everything even if it's been downloaded before, toggle the ignore switch below."
+                )
                 yield Horizontal(
-                    Static("Append Mode: ", classes="append-mode-label"),
-                    Switch(id="append", disabled=True),
                     Static("Ignore archive: ", classes="ignore-archive-label"),
-                    Switch(id="ignore-archive", disabled=True),
+                    Switch(id="ignore-archive"),
                     classes="subs-horizontal",
                 )
                 yield ItemGrid(
@@ -49,20 +48,23 @@ class DownloadPane(Vertical):
                     classes="subs-actions",
                     min_column_width=16,
                 )
+                yield ItemGrid(
+                    Button("Download (Append)", id="download-append-button", variant="primary"),
+                    classes="subs-actions",
+                    min_column_width=16,
+                )
 
     ############################ Selection ############################
 
-    def set_selection(self, kind: str | None, name: str | None) -> None:
+    def set_selection(self, kind: str | None, name: str | None, *, reset_options: bool = True) -> None:
         self._kind = kind
         self._name = name
         self.query_one("#download-button", Button).disabled = not (kind and name)
         self.query_one("#download-selection", Label).update(name or "")
 
-        append = self.query_one("#append", Switch)
-        append.disabled = kind != "subscription"
-        if append.disabled:
-            append.value = False
-        self._sync_ignore_archive_switch()
+        # forces ignore archive to be toggled off when picking a different entry
+        if reset_options:
+            self.query_one("#ignore-archive", Switch).value = False
 
         # locks append tab for single lists and the download all screen
         tabs = self.query_one("#download-tabs", TabbedContent)
@@ -72,29 +74,61 @@ class DownloadPane(Vertical):
         else:
             tabs.enable_tab("download-append-tab")
 
-    def _sync_ignore_archive_switch(self) -> None:
-        append_on = self.query_one("#append", Switch).value
-        ignore_archive = self.query_one("#ignore-archive", Switch)
-        if not append_on:
-            ignore_archive.value = False
-        ignore_archive.disabled = not append_on
-
     ############################ Append ############################
 
-    @staticmethod
-    def _ensure_append_list() -> None:
-        ensure_list_txt(_APPEND_LIST_NAME, SUBSCRIPTION_LISTS_DIR)
-
-    @on(Switch.Changed, "#append")
-    def on_append_mode_changed(self, event: Switch.Changed) -> None:
-        if event.value:
-            self._ensure_append_list()
-        self._sync_ignore_archive_switch()
+    def _append_target(self) -> tuple[str, tuple[str, str, str | None, str]] | None:
+        # gets (name, subscription entry) for the selected subscription, or posts a warning if None.
+        name = self._name
+        if self._kind != "subscription" or not name or name == DOWNLOAD_ALL_LABEL:
+            self.notify("Select a single subscription first.", severity="warning")
+            return None
+        subscription = subscription_entry(name)
+        if not subscription:
+            self.notify("Unknown subscription.", severity="warning")
+            return None
+        return name, subscription
 
     @on(Button.Pressed, "#edit-append-list-button")
     def on_edit_append_list_pressed(self, event: Button.Pressed) -> None:
-        self._ensure_append_list()
-        open_editor_path(self, lists_txt_path(_APPEND_LIST_NAME, SUBSCRIPTION_LISTS_DIR))
+        target = self._append_target()
+        if not target:
+            return
+        _, (_, list_file, _, _) = target
+        append_file = append_list_name(list_file)
+        ensure_list_txt(append_file, APPEND_LISTS_DIR)
+        open_editor_path(self, lists_txt_path(append_file, APPEND_LISTS_DIR))
+
+    @on(Button.Pressed, "#download-append-button")
+    def on_download_append_pressed(self, event: Button.Pressed) -> None:
+        target = self._append_target()
+        if not target:
+            return
+        name, (dest_folder, list_file, archive, extra_flags) = target
+        append_file = append_list_name(list_file)
+        if list_file_is_empty(append_file, APPEND_LISTS_DIR):
+            self.notify(
+                f'The append list for "{name}" is empty. Use "Edit Append List" to add links.',
+                severity="warning",
+            )
+            return
+
+        # Append downloads must not skip media, so drop the subscription's --filter.
+        global_flags = flags_without_option(
+            global_flags_string("global-flags-subscriptions"), "--filter"
+        )
+        use_archive = None if self.query_one("#ignore-archive", Switch).value else archive
+
+        self._run_download(
+            dest_folder=dest_folder,
+            input_file=append_file,
+            path_key="sub",
+            archive=use_archive,
+            lists_dir=APPEND_LISTS_DIR,
+            global_flags=global_flags,
+            extra_flags=extra_flags,
+            job_name=f"{name} (append)",
+            notify_message=f"Starting append download for {name}.",
+        )
 
     ############################ Download ############################
 
@@ -135,10 +169,8 @@ class DownloadPane(Vertical):
         )
 
     def _download_subscription(self, name: str) -> None:
-        append = self.query_one("#append", Switch).value
-
         if name == DOWNLOAD_ALL_LABEL:
-            self._download_all_subscriptions(append)
+            self._download_all_subscriptions()
             return
 
         subscription = subscription_entry(name)
@@ -147,42 +179,23 @@ class DownloadPane(Vertical):
             return
 
         dest_folder, list_file, archive, extra_flags = subscription
-        if append:
-            self._ensure_append_list()
-            input_file = _APPEND_LIST_NAME
-            label = "Append list"
-            job_name = f"{name} (append)"
-        else:
-            input_file = list_file
-            label = f'Subscription "{name}"'
-            job_name = name
-
-        if not self._require_nonempty_list(input_file, lists_dir=SUBSCRIPTION_LISTS_DIR, label=label):
+        if not self._require_nonempty_list(
+            list_file, lists_dir=SUBSCRIPTION_LISTS_DIR, label=f'Subscription "{name}"'
+        ):
             return
-
-        global_flags = global_flags_string("global-flags-subscriptions")
-        if append:
-            global_flags = flags_without_option(global_flags, "--filter")
-
-        use_archive = archive
-        if append and self.query_one("#ignore-archive", Switch).value:
-            use_archive = None
 
         self._run_download(
             dest_folder=dest_folder,
-            input_file=input_file,
+            input_file=list_file,
             path_key="sub",
-            archive=use_archive,
-            global_flags=global_flags,
+            archive=archive,
+            global_flags=global_flags_string("global-flags-subscriptions"),
             extra_flags=extra_flags,
-            job_name=job_name,
+            job_name=name,
             notify_message=f"Starting download for {name}.",
         )
 
-    def _download_all_subscriptions(self, append: bool) -> None:
-        if append:
-            self.notify("Turn off Append mode first.", severity="warning")
-            return
+    def _download_all_subscriptions(self) -> None:
         subs = job_section("subscription")
         if not subs:
             self.notify("No subscriptions in config.", severity="warning")

@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3 - 2026/11/XX
+The user interface gets a complete redesign, along with some changes to how append mode works.
+
+### Update Instructions
+- If you already have a copy of batchGDL, ***delete the existing batchGDL folder*** before dropping in the version inside the zip. The structure of the code has changed since the last update. Avoiding this step might cause unintended behavior.
+- The readme has been updated. If you have a local copy, consider replacing it.
+- Append list behavior has changed. If you still have a "#append.txt" file in your /lists folder, you should delete it.
+- _**Do not replace the `batchGDL-config.json` or `gdl-config.json` files as it will destroy your settings!**_
+
+### Added:
+- New UI
+  - Download jobs are now listed in a tree-style list on the left, as are the search, settings, and add list buttons.
+  - The list editor is now always visible on the right side of the screen.
+    - This change makes the button to open the list file always visible.
+- Append Mode Changes
+  - Each subscription job now has its own append list, letting you run multiple append jobs in parallel.
+
+### Fixes:
+- Removed excess refresh config buttons from the settings menus.
+- On a "Download All" run, the download terminal previously printed "Job Failed" if any errors were raised, despite the download otherwise being successful. To prevent confusion, it will instead print "Job completed with errors. Continuing."
+- "Job finished with code [X]" messages have been changed to say "Download finished with errors. (Code [X].)"
+- Changing a list filename in-app will rename the file so you don't have to do it manually.
+
+### Changes:
+- Lots of UI code has been moved to the widgets folder.
+
 ## 0.2.2 - 2026/10/08
 I bring some small anti-annoyance changes with this version.
 ### Fixes:

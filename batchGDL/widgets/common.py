@@ -11,7 +11,8 @@ DOWNLOAD_ALL_LABEL = "-Download All-"
 
 
 class ConfigChanged(Message):
-    """Posted when config or list entries changed; SidebarTest reloads its widgets."""
+    # posts after config or list entries get changed.
+    pass
 
 
 def open_editor_path(widget: Widget, path: str) -> None:

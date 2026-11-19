@@ -9,7 +9,7 @@ from .common import DOWNLOAD_ALL_LABEL, ConfigChanged, reload_config_from_disk
 from .controls import Controls
 
 
-class Sidebar(Widget):
+class SidebarTree(Widget):
     BORDER_TITLE = "Menu"
 
     def compose(self) -> ComposeResult:
@@ -43,13 +43,13 @@ class Sidebar(Widget):
         tree.root.add("Add New List", data="add_list", allow_expand=False)
 
 
-class SidebarTest(Horizontal):
+class Sidebar(Horizontal):
 
     def __init__(self) -> None:
         super().__init__(classes="sidebar-layout")
 
     def compose(self) -> ComposeResult:
-        yield Sidebar()
+        yield SidebarTree()
         yield Controls()
 
     @on(Tree.NodeSelected, "#download-tree")
@@ -59,5 +59,5 @@ class SidebarTest(Horizontal):
     @on(ConfigChanged)
     def on_config_changed(self, event: ConfigChanged) -> None:
         event.stop()
-        self.query_one(Sidebar).refresh_tree()
+        self.query_one(SidebarTree).refresh_tree()
         self.query_one(Controls).reload_from_config()

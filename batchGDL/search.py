@@ -2,12 +2,12 @@ import os
 
 from rapidfuzz import fuzz
 
-from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
+from .constants import APPEND_LISTS_DIR, SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
 
 _MIN_SCORE = 0.68
 _WORD_FUZZ_CUTOFF = 86.0
 _LINE_FUZZ_CUTOFF = 78.0
-_SEARCH_DIRS = (SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR)
+_SEARCH_DIRS = (SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR, APPEND_LISTS_DIR)
 
 
 def _single_word_score(word: str, line_lower: str) -> float:

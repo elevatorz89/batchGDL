@@ -14,7 +14,7 @@ class AddListPane(Vertical):
     def compose(self) -> ComposeResult:
         yield Markdown("Add a new single list or subscription.")
         yield ItemGrid(
-            Button("Add Single List", id="sidebar-add-list-button", variant="primary"),
+            Button("Add Single List", id="sidebar-add-list-button"),
             Button("Add Subscription", id="sidebar-add-subscription-button"),
             classes="list-actions",
             min_column_width=18,

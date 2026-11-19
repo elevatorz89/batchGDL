@@ -54,10 +54,12 @@ Refer to the official repositories for assistance and bugs related to the downlo
 If a gallery-dl update fixes an issue, you can update it from the Config tab.
 
 # FAQ
-- What does the "Append Mode" switch do on the Subscription tab?
-  - Append mode downloads from the Append List instead of the subscription list. This is useful if you want to add more links to a subscription and *only download the new links.* To enable this behavior, it will strip `--filter` from the subscription global flags to ensure that it will not skip any media.
+- What does the Append Tab do?
+  - Append lists are used to add additional links to a subscription list; particularly to let you download everything from an account while ignoring date filters.
+  - Each subscription has its own append list file so you can run multiple append jobs in parallel.
+  - By default, append jobs will ignore items already in the archive file to avoid accidental downloads of duplicate media.
   - If you want to also ignore the subscription's archive file, you can toggle the "Ignore Archive" switch.
-  - If you want to perform a one-off download of something specific, it's better to make a list in the "Single" tab and download using that.
+  - If you want to perform a one-off download of something specific, it's better to make a "Single" list and download using that instead.
 - How do I restore a list from the trash?
   - Deleted lists are stored in your `lists/trash` folder.
   - Move the list back to the single or subscriptions folder, then re-create the entry with the "Add List" button. Make sure that the list filename matches, or it won't relink.

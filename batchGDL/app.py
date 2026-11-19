@@ -3,7 +3,7 @@ from textual.binding import Binding
 from textual.widgets import Footer, Header
 
 from .constants import APP_VERSION
-from .widgets import SidebarTest
+from .widgets import Sidebar
 
 
 class GdlTui(App):
@@ -13,7 +13,7 @@ class GdlTui(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield SidebarTest()
+        yield Sidebar()
         yield Footer(show_command_palette=False)
 
     def on_mount(self) -> None:

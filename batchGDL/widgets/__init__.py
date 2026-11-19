@@ -4,7 +4,7 @@ from .download_pane import DownloadPane
 from .edit_pane import EditPane
 from .search_pane import SearchPane
 from .settings_pane import SettingsPane
-from .sidebar import Sidebar, SidebarTest
+from .sidebar import Sidebar, SidebarTree
 
 __all__ = [
     "AddListPane",
@@ -14,5 +14,5 @@ __all__ = [
     "SearchPane",
     "SettingsPane",
     "Sidebar",
-    "SidebarTest",
+    "SidebarTree",
 ]

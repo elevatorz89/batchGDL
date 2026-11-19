@@ -8,8 +8,11 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Input
 
 from .config import config, save_config, entry_extra_flags, job_section, with_optional_flags
-from .constants import SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
-from .lists import slug_list_name, lists_txt_path, ensure_list_txt, ensure_or_rename_list_txt
+from .constants import APPEND_LISTS_DIR, SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
+from .lists import (
+    append_list_name, slug_list_name, lists_txt_path, ensure_list_txt,
+    ensure_or_rename_list_txt,
+)
 from .system import open_editor, move_to_trash, clear_list_trash
 
 _MODAL_SCROLL = "list-modal list-modal-scroll"
@@ -23,8 +26,8 @@ LIST_FIELDS: tuple[tuple[str, str, str], ...] = (
 
 SUBSCRIPTION_FIELDS: tuple[tuple[str, str, str], ...] = (
     ("Display name", "display-name", "My Subscription"),
-    ("Category folder", "category", "Defaults to display name"),
     ("List filename", "list-file", "Defaults to display name"),
+    ("Destination folder", "dest-folder", "Defaults to list filename"),
     ("Archive filename", "archive-file", "Required"),
     ("Extra flags", "extra-flags", 'Optional, e.g. --write-metadata --filter "score > 10"'),
 )
@@ -52,7 +55,7 @@ def subscription_initial_values(original_name: str | None) -> dict[str, str]:
         return {"display-name": original_name}
     return {
         "display-name": original_name,
-        "category": entry[0],
+        "dest-folder": entry[0],
         "list-file": entry[1],
         "archive-file": entry[2] if len(entry) > 2 else "",
         "extra-flags": entry_extra_flags(entry, 3),
@@ -68,14 +71,13 @@ def build_list_entry(values: dict[str, str]) -> list[str]:
 
 def build_subscription_entry(values: dict[str, str]) -> list[str] | None:
     display_name = values["display-name"]
-    slug = slug_list_name(display_name)
-    category = slug_list_name(values.get("category", "") or slug)
-    list_file = slug_list_name(values.get("list-file", "") or slug)
+    list_file = slug_list_name(values.get("list-file", "") or display_name)
+    dest_folder = slug_list_name(values.get("dest-folder", "") or list_file)
     archive_file = values.get("archive-file", "")
     if not archive_file:
         return None
     return with_optional_flags(
-        [category, list_file, slug_list_name(archive_file)],
+        [dest_folder, list_file, slug_list_name(archive_file)],
         values.get("extra-flags", ""),
     )
 
@@ -104,7 +106,7 @@ def save_job_entry(
     values: dict[str, str],
     entry: list[str],
 ) -> str:
-    """Persist a job entry and return the saved display name."""
+    # returns saved display name
     display_name = values["display-name"]
     section_data = job_section(section)
 
@@ -115,6 +117,14 @@ def save_job_entry(
     new_list_file = list_file_from_values(section, values)
     if new_list_file:
         ensure_or_rename_list_txt(old_list_file, new_list_file, lists_dir)
+        if section == "subscription" and old_list_file:
+            # Keep the subscription's append list (if it has one) matched to its list file.
+            ensure_or_rename_list_txt(
+                append_list_name(old_list_file),
+                append_list_name(new_list_file),
+                APPEND_LISTS_DIR,
+                create_if_missing=False,
+            )
 
     if original_name and original_name != display_name:
         section_data.pop(original_name, None)
@@ -347,6 +357,17 @@ class DeleteEntryModal(ModalScreen[bool]):
                 except OSError as e:
                     self.app.notify(f"Could not move list file to trash: {e}", severity="error")
                     return
+            if self.config_section == "subscription":
+                # If the append list could not be moved to the trash, notify the user.
+                append_path = lists_txt_path(append_list_name(self.list_file), APPEND_LISTS_DIR)
+                if os.path.isfile(append_path):
+                    try:
+                        move_to_trash(append_path)
+                    except OSError as e:
+                        self.app.notify(
+                            f"Could not move append list to trash ({e}). It was left in {APPEND_LISTS_DIR}.",
+                            severity="warning",
+                        )
 
         job_section(self.config_section).pop(self.item_name, None)
         save_config()
