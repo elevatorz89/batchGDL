@@ -62,7 +62,9 @@ If a gallery-dl update fixes an issue, you can update it from the Config tab.
   - If you want to perform a one-off download of something specific, it's better to make a "Single" list and download using that instead.
 - How do I restore a list from the trash?
   - Deleted lists are stored in your `lists/trash` folder.
-  - Move the list back to the single or subscriptions folder, then re-create the entry with the "Add List" button. Make sure that the list filename matches, or it won't relink.
+  1. Move the list back to the single or subscriptions folder. 
+  2. If you're restoring a subscriptions list, make sure to restore its append list (named `ap_[listname].txt`) as well.
+  3. Then re-create the entry with the "Add List" button. Make sure that the list filename matches, or it won't relink.
 - I can't download things from a particular site.
   - This is most likely an issue with gallery-dl. Try updating it from the Config tab, then file an issue on their [GitHub](https://github.com/mikf/gallery-dl) or [Codeberg](https://codeberg.org/mikf/gallery-dl) page if the issue persists.
   - Sometimes, sites may require you to provide cookies, an API key, or for you to log in using OAuth.
