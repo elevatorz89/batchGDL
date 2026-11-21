@@ -10,10 +10,9 @@ from textual.widgets import Button, Label, Input
 from .config import config, save_config, entry_extra_flags, job_section, with_optional_flags
 from .constants import APPEND_LISTS_DIR, SINGLE_LISTS_DIR, SUBSCRIPTION_LISTS_DIR
 from .lists import (
-    append_list_name, slug_list_name, lists_txt_path, ensure_list_txt,
-    ensure_or_rename_list_txt,
+    append_list_name, slug_list_name, lists_txt_path, ensure_or_rename_list_txt,
 )
-from .system import open_editor, move_to_trash, clear_list_trash
+from .system import move_to_trash, clear_list_trash
 
 _MODAL_SCROLL = "list-modal list-modal-scroll"
 
@@ -82,7 +81,7 @@ def build_subscription_entry(values: dict[str, str]) -> list[str] | None:
     )
 
 
-def list_file_from_values(section: str, values: dict[str, str]) -> str | None:
+def list_file_from_values(values: dict[str, str]) -> str | None:
     display_name = values.get("display-name", "")
     list_file = values.get("list-file", "")
     if not (display_name or list_file):
@@ -114,7 +113,7 @@ def save_job_entry(
     if original_name and original_name in section_data:
         old_list_file = list_file_from_entry(section, section_data[original_name])
 
-    new_list_file = list_file_from_values(section, values)
+    new_list_file = list_file_from_values(values)
     if new_list_file:
         ensure_or_rename_list_txt(old_list_file, new_list_file, lists_dir)
         if section == "subscription" and old_list_file:
@@ -162,58 +161,28 @@ def compose_entry_fields(
         )
 
 
-def compose_entry_form(
-    title: str,
-    fields: tuple[tuple[str, str, str], ...],
-    *,
-    confirm_label: str,
-    values: dict[str, str] | None = None,
-    show_open_list: bool = False,
-) -> ComposeResult:
+def compose_entry_form(title: str, fields: tuple[tuple[str, str, str], ...]) -> ComposeResult:
     with VerticalScroll(classes=_MODAL_SCROLL):
         yield Label(title, classes="list-modal-title")
-        yield from compose_entry_fields(fields, values=values)
+        yield from compose_entry_fields(fields)
         yield Label("", id="entry-error", classes="list-modal-error")
         with ItemGrid(classes="list-modal-actions", min_column_width=14):
-            yield Button(confirm_label, id="entry-confirm", variant="primary")
-            if show_open_list:
-                yield Button("Open list file", id="entry-open-list")
+            yield Button("Add", id="entry-confirm", variant="primary")
             yield Button("Cancel", id="entry-cancel")
 
 
 class EntryModal(ModalScreen[bool]):
     BINDINGS = [Binding("escape", "cancel", "Cancel")]
     _FIELDS: tuple[tuple[str, str, str], ...] = ()
-    _TITLE_ADD = "Add"
-    _TITLE_EDIT = "Edit"
+    _TITLE = "Add"
     _CONFIG_SECTION = ""
     _LISTS_DIR = SUBSCRIPTION_LISTS_DIR
-
-    def __init__(self, *, original_name: str | None = None) -> None:
-        super().__init__()
-        self.original_name = original_name
-        self.editing = original_name is not None
-
-    def initial_values(self) -> dict[str, str]:
-        return {}
-
-    def list_file_from_values(self, values: dict[str, str]) -> str | None:
-        return list_file_from_values(self._CONFIG_SECTION, values)
-
-    def list_file_from_entry(self, entry: list) -> str | None:
-        return list_file_from_entry(self._CONFIG_SECTION, entry)
 
     def build_entry(self, values: dict[str, str], error: Label) -> list[str] | None:
         raise NotImplementedError
 
     def compose(self) -> ComposeResult:
-        yield from compose_entry_form(
-            self._TITLE_EDIT if self.editing else self._TITLE_ADD,
-            self._FIELDS,
-            confirm_label="Save" if self.editing else "Add",
-            values=self.initial_values() if self.editing else None,
-            show_open_list=self.editing,
-        )
+        yield from compose_entry_form(self._TITLE, self._FIELDS)
 
     def on_mount(self) -> None:
         self.query_one("#display-name", Input).focus()
@@ -231,19 +200,6 @@ class EntryModal(ModalScreen[bool]):
     def on_cancel_pressed(self, event: Button.Pressed) -> None:
         self.dismiss(False)
 
-    @on(Button.Pressed, "#entry-open-list")
-    def on_open_list_pressed(self, event: Button.Pressed) -> None:
-        list_file = self.list_file_from_values(self._field_values())
-        if not list_file and self.original_name:
-            entry = job_section(self._CONFIG_SECTION).get(self.original_name)
-            if entry:
-                list_file = self.list_file_from_entry(entry)
-        if not list_file:
-            self.app.notify("No list file to open.", severity="warning")
-            return
-        ensure_list_txt(list_file, self._LISTS_DIR)
-        open_editor(os.path.abspath(lists_txt_path(list_file, self._LISTS_DIR)))
-
     @on(Input.Submitted)
     @on(Button.Pressed, "#entry-confirm")
     def on_submit(self, event: object) -> None:
@@ -258,7 +214,7 @@ class EntryModal(ModalScreen[bool]):
             return
 
         section = job_section(self._CONFIG_SECTION)
-        if display_name in section and display_name != self.original_name:
+        if display_name in section:
             kind = "subscription" if self._CONFIG_SECTION == "subscription" else "list"
             error.update(f"A {kind} with that display name already exists.")
             return
@@ -270,7 +226,7 @@ class EntryModal(ModalScreen[bool]):
         save_job_entry(
             section=self._CONFIG_SECTION,
             lists_dir=self._LISTS_DIR,
-            original_name=self.original_name,
+            original_name=None,
             values=values,
             entry=entry,
         )
@@ -279,13 +235,9 @@ class EntryModal(ModalScreen[bool]):
 
 class ListModal(EntryModal):
     _FIELDS = LIST_FIELDS
-    _TITLE_ADD = "Add List"
-    _TITLE_EDIT = "Edit List"
+    _TITLE = "Add List"
     _CONFIG_SECTION = "single"
     _LISTS_DIR = SINGLE_LISTS_DIR
-
-    def initial_values(self) -> dict[str, str]:
-        return list_initial_values(self.original_name)
 
     def build_entry(self, values: dict[str, str], error: Label) -> list[str] | None:
         return build_list_entry(values)
@@ -293,13 +245,9 @@ class ListModal(EntryModal):
 
 class SubscriptionModal(EntryModal):
     _FIELDS = SUBSCRIPTION_FIELDS
-    _TITLE_ADD = "Add Subscription"
-    _TITLE_EDIT = "Edit Subscription"
+    _TITLE = "Add Subscription"
     _CONFIG_SECTION = "subscription"
     _LISTS_DIR = SUBSCRIPTION_LISTS_DIR
-
-    def initial_values(self) -> dict[str, str]:
-        return subscription_initial_values(self.original_name)
 
     def build_entry(self, values: dict[str, str], error: Label) -> list[str] | None:
         entry = build_subscription_entry(values)
@@ -404,45 +352,4 @@ class ClearTrashModal(ModalScreen[bool]):
             self.app.notify(f"Deleted {removed} trashed list(s).", severity="information")
         else:
             self.app.notify("No trashed lists to delete.", severity="information")
-        self.dismiss(True)
-
-
-class GlobalFlagsModal(ModalScreen[bool]):
-    BINDINGS = [Binding("escape", "cancel", "Cancel")]
-
-    def __init__(self, config_key: str, title: str) -> None:
-        super().__init__()
-        self.config_key = config_key
-        self.title_text = title
-
-    def _flags_value(self) -> str:
-        return global_flags_value(self.config_key)
-
-    def compose(self) -> ComposeResult:
-        with VerticalScroll(classes=_MODAL_SCROLL):
-            yield Label(self.title_text, classes="list-modal-title")
-            yield Label("Global flags")
-            yield Input(
-                value=self._flags_value(),
-                id="global-flags",
-                placeholder='e.g. --cookies-from-browser firefox',
-            )
-            with ItemGrid(classes="list-modal-actions", min_column_width=14):
-                yield Button("Save", id="global-flags-confirm", variant="primary")
-                yield Button("Cancel", id="global-flags-cancel")
-
-    def on_mount(self) -> None:
-        self.query_one("#global-flags", Input).focus()
-
-    def action_cancel(self) -> None:
-        self.dismiss(False)
-
-    @on(Button.Pressed, "#global-flags-cancel")
-    def on_cancel_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss(False)
-
-    @on(Input.Submitted, "#global-flags")
-    @on(Button.Pressed, "#global-flags-confirm")
-    def on_submit(self, event: object) -> None:
-        save_global_flags(self.config_key, self.query_one("#global-flags", Input).value)
         self.dismiss(True)

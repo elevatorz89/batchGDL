@@ -1,5 +1,6 @@
 import os
 
+from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, ItemGrid, Vertical
@@ -16,6 +17,50 @@ from ..system import spawn_new_console
 from .common import DOWNLOAD_ALL_LABEL, open_editor_path
 
 
+class SelectionCard(Vertical):
+    # bordered card showing a name, a type subtitle, and aligned label/value rows.
+
+    def __init__(self, title: str, *, id: str | None = None) -> None:
+        super().__init__(id=id, classes="selection-card -empty")
+        self.border_title = title
+
+    def compose(self) -> ComposeResult:
+        yield Label("", classes="selection-card-name")
+        yield Static("", classes="selection-card-details")
+
+    def show(
+        self,
+        name: str | None,
+        subtitle: str | None = None,
+        rows: list[tuple[str, str | None]] | None = None,
+        *,
+        hint: str = "",
+    ) -> None:
+        title = self.query_one(".selection-card-name", Label)
+        details = self.query_one(".selection-card-details", Static)
+        self.set_class(not name, "-empty")
+        self.border_subtitle = subtitle if name else None
+        if not name:
+            title.update("Nothing selected")
+            details.display = bool(hint)
+            details.update(Text(hint, style="italic"))
+            return
+
+        title.update(Text(name, style="bold"))
+        rows = [(label, value) for label, value in rows or [] if value]
+        details.display = bool(rows)
+        if not rows:
+            return
+        width = max(len(label) for label, _ in rows)
+        text = Text()
+        for i, (label, value) in enumerate(rows):
+            if i:
+                text.append("\n")
+            text.append(f"{label:<{width}}  ", style="dim")
+            text.append(str(value))
+        details.update(text)
+
+
 class DownloadPane(Vertical):
 
     def __init__(self) -> None:
@@ -26,8 +71,7 @@ class DownloadPane(Vertical):
     def compose(self) -> ComposeResult:
         with TabbedContent(id="download-tabs"):
             with TabPane("Downloader", id="download-main-tab"):
-                yield Markdown("Selected list:")
-                yield Label("", id="download-selection")
+                yield SelectionCard("Selected List", id="download-selection-card")
                 yield ItemGrid(
                     Button("Download", id="download-button", variant="primary", disabled=True),
                     classes="list-actions",
@@ -38,6 +82,7 @@ class DownloadPane(Vertical):
                     "Downloads from this tab will only include links in the below append list and ignore date filters. "
                     "If you wish to download absolutely everything even if it's been downloaded before, toggle the ignore switch below."
                 )
+                yield SelectionCard("Append List", id="append-selection-card")
                 yield Horizontal(
                     Static("Ignore archive: ", classes="ignore-archive-label"),
                     Switch(id="ignore-archive"),
@@ -60,7 +105,8 @@ class DownloadPane(Vertical):
         self._kind = kind
         self._name = name
         self.query_one("#download-button", Button).disabled = not (kind and name)
-        self.query_one("#download-selection", Label).update(name or "")
+        self._update_selection_card(kind, name)
+        self._update_append_card()
 
         # forces ignore archive to be toggled off when picking a different entry
         if reset_options:
@@ -73,6 +119,30 @@ class DownloadPane(Vertical):
             tabs.disable_tab("download-append-tab")
         else:
             tabs.enable_tab("download-append-tab")
+
+    def _update_selection_card(self, kind: str | None, name: str | None) -> None:
+        card = self.query_one("#download-selection-card", SelectionCard)
+        if not (kind and name):
+            card.show(None, hint="Pick a list or subscription from the sidebar.")
+            return
+
+        if kind == "single":
+            entry = single_list_entry(name)
+            card.show(name, "Single list", [("Extra flags", entry[2] if entry else None)])
+        elif name == DOWNLOAD_ALL_LABEL:
+            subs = job_section("subscription")
+            card.show(name, "All subscriptions", [("Subscriptions", str(len(subs)))])
+        else:
+            entry = subscription_entry(name)
+            card.show(name, "Subscription", [("Extra flags", entry[3] if entry else None)])
+
+    def _update_append_card(self) -> None:
+        card = self.query_one("#append-selection-card", SelectionCard)
+        name = self._name
+        if self._kind != "subscription" or not name or name == DOWNLOAD_ALL_LABEL:
+            card.show(None, hint="Select a single subscription first.")
+            return
+        card.show(name)
 
     ############################ Append ############################
 

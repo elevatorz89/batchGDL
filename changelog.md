@@ -25,6 +25,7 @@ The user interface gets a complete redesign, along with some changes to how appe
 
 ### Changes:
 - Lots of UI code has been moved to the widgets folder.
+- Terminal windows are titled after the job name.
 
 ## 0.2.2 - 2026/10/08
 I bring some small anti-annoyance changes with this version.

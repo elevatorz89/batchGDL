@@ -13,7 +13,7 @@ class SidebarTree(Widget):
     BORDER_TITLE = "Menu"
 
     def compose(self) -> ComposeResult:
-        yield Tree("Menu", id="download-tree", classes="sidebar-tree")
+        yield Tree("Menu", id="menu-tree", classes="sidebar-tree")
         yield Button("Refresh", id="sidebar-refresh-button", flat=True, classes="refresh-button")
 
     def on_mount(self) -> None:
@@ -24,7 +24,7 @@ class SidebarTree(Widget):
         reload_config_from_disk(self)
 
     def refresh_tree(self) -> None:
-        tree = self.query_one("#download-tree", Tree)
+        tree = self.query_one("#menu-tree", Tree)
         tree.clear()
         tree.show_root = False
         tree.root.expand()
@@ -52,8 +52,8 @@ class Sidebar(Horizontal):
         yield SidebarTree()
         yield Controls()
 
-    @on(Tree.NodeSelected, "#download-tree")
-    def on_download_tree_selected(self, event: Tree.NodeSelected) -> None:
+    @on(Tree.NodeSelected, "#menu-tree")
+    def on_menu_tree_selected(self, event: Tree.NodeSelected) -> None:
         self.query_one(Controls).show_for_selection(event.node.data)
 
     @on(ConfigChanged)

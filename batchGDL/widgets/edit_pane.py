@@ -1,5 +1,3 @@
-import os
-
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import ItemGrid, Vertical, VerticalScroll
@@ -20,8 +18,7 @@ from ..modals import (
     list_file_from_values, list_file_from_entry,
     save_job_entry, global_flags_value, save_global_flags, compose_entry_fields,
 )
-from ..system import open_editor
-from .common import DOWNLOAD_ALL_LABEL
+from .common import DOWNLOAD_ALL_LABEL, open_editor_path
 
 _EDIT_SINGLE_PREFIX = "edit-single-"
 _EDIT_SUB_PREFIX = "edit-sub-"
@@ -41,7 +38,7 @@ class EditPane(Widget):
             self.name = name
 
     class Deleted(Message):
-        # TODO: handles deleted lists or subscriptions
+        # triggers on deleted lists
         pass
 
     def __init__(self) -> None:
@@ -94,14 +91,6 @@ class EditPane(Widget):
 
     def on_mount(self) -> None:
         self.clear_selection()
-
-    @property
-    def selection_kind(self) -> str | None:
-        return self._kind
-
-    @property
-    def selection_name(self) -> str | None:
-        return self._name
 
     @property
     def flags_config_key(self) -> str | None:
@@ -208,7 +197,7 @@ class EditPane(Widget):
 
     def save_list(self) -> str | None:
         if not self._kind or not self._name:
-            self.app.notify("Select a list or subscription to edit.", severity="warning")
+            self.notify("Select a list or subscription to edit.", severity="warning")
             return None
 
         if self._kind == "single":
@@ -265,7 +254,7 @@ class EditPane(Widget):
     def save_flags(self) -> bool:
         key = self.flags_config_key
         if not key:
-            self.app.notify("Select a list or subscription first.", severity="warning")
+            self.notify("Select a list or subscription first.", severity="warning")
             return False
         save_global_flags(key, self.query_one("#edit-global-flags", Input).value)
         return True
@@ -275,7 +264,7 @@ class EditPane(Widget):
 
     def open_list_file(self) -> None:
         if not self._kind or not self._name:
-            self.app.notify("Select a list or subscription first.", severity="warning")
+            self.notify("Select a list or subscription first.", severity="warning")
             return
         if self._kind == "single":
             values = self._field_values(LIST_FIELDS, _EDIT_SINGLE_PREFIX)
@@ -286,16 +275,16 @@ class EditPane(Widget):
             lists_dir = SUBSCRIPTION_LISTS_DIR
             section = "subscription"
 
-        list_file = list_file_from_values(section, values)
+        list_file = list_file_from_values(values)
         if not list_file:
             entry = job_section(section).get(self._name)
             if entry:
                 list_file = list_file_from_entry(section, entry)
         if not list_file:
-            self.app.notify("No list file to open.", severity="warning")
+            self.notify("No list file to open.", severity="warning")
             return
         ensure_list_txt(list_file, lists_dir)
-        open_editor(os.path.abspath(lists_txt_path(list_file, lists_dir)))
+        open_editor_path(self, lists_txt_path(list_file, lists_dir))
 
     ############################ Button handlers ############################
 

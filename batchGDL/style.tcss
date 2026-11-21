@@ -21,11 +21,6 @@ SidebarTree .sidebar-tree {
     margin-bottom: 1;
 }
 
-SidebarTree .sidebar-nav {
-    height: auto;
-    margin-top: 1;
-}
-
 Controls {
     width: 1fr;
     height: 1fr;
@@ -52,6 +47,17 @@ Controls EditPane {
     width: 1fr;
 }
 
+Controls #download-tabs,
+Controls #download-tabs > ContentSwitcher,
+Controls #download-tabs TabPane {
+    height: 1fr;
+}
+
+Controls #download-append-tab {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
 Controls EditPane {
     border: solid $primary;
     padding: 0 1;
@@ -62,7 +68,6 @@ Controls EditPane .edit-pane-scroll {
     scrollbar-gutter: stable;
 }
 
-/* Tab bar stays fixed; each tab pane scrolls its own content. */
 Controls EditPane #edit-tabs {
     height: 1fr;
 }
@@ -72,7 +77,6 @@ Controls EditPane TabPane {
     overflow: hidden;
 }
 
-/* Let the form size itself so the tab's scroll area can scroll it. */
 Controls EditPane #edit-list-switcher,
 Controls EditPane #edit-list-switcher > Vertical {
     height: auto;
@@ -82,8 +86,6 @@ Controls EditPane Input {
     margin-bottom: 1;
 }
 
-/* Tighten the space between the last field and the action buttons.
-   The error label only takes a row when it has a message. */
 Controls EditPane .list-modal-error {
     height: auto;
     margin-top: 0;
@@ -103,6 +105,37 @@ ItemGrid {
     padding: 0 4;
 }
 
+.selection-card {
+    height: auto;
+    margin: 1 4 0 4;
+    padding: 0 1;
+    border: round $accent;
+    border-title-color: $accent;
+    border-title-style: bold;
+    border-subtitle-color: $text-muted;
+    background: $boost;
+}
+
+.selection-card.-empty {
+    border: round $panel-lighten-2;
+    border-title-color: $text-muted;
+}
+
+.selection-card-name {
+    color: $text-accent;
+}
+
+.selection-card-details {
+    color: $text;
+    margin-top: 1;
+}
+
+.selection-card.-empty .selection-card-name,
+.selection-card.-empty .selection-card-details {
+    color: $text-muted;
+    margin-top: 0;
+}
+
 .subs-horizontal {
     height: 3;
     align: left middle;
@@ -110,12 +143,6 @@ ItemGrid {
     width: auto;
     margin-top: 1;
     margin-left: 4;
-}
-
-.append-mode-label, .ignore-archive-label {
-    height: 3;
-    content-align: center middle;
-    width: auto;
 }
 
 .ignore-archive-label {
@@ -129,7 +156,7 @@ ItemGrid {
     background: lightgray
 }
 
-.list-selection, .subscription-selection, .oauth-site-list {
+.oauth-site-list {
     height: auto;
     max-height: 12;
 }
